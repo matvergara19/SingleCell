@@ -188,27 +188,42 @@ summarize_nfeature_plot <- function(obj_list, labels = NULL, colores = NULL) {
 #' @param group_by          Metadata column used to color the cells.
 #' @param colors            Vector of colors (one per group), or NULL.
 #' @param pt_size           Size of the cell points.
-#' @param legend_text_size  Size of the legend text.
-#' @param legend_key_cm     Size of the legend keys, in cm.
-#' @param legend_point_size Size of the points drawn in the legend.
+#' @param legend_text_size  Size of the legend text (default 32; 11.2 for cell-type columns).
+#' @param legend_key_cm     Size of the legend keys, in cm (default 2; 1.2 for cell-type columns).
+#' @param legend_point_size Size of the points drawn in the legend (default 10; 6 for cell-type columns).
 #' @param axis_title_size   Size of the axis titles.
 #' @param axis_text_size    Size of the axis tick labels.
 #' @param label             Print the group names on the plot. Default NULL: TRUE when
 #'                          group_by is "seurat_clusters" or a cell-type column
 #'                          (name starting with "celltype"), FALSE otherwise.
-#' @param label_size        Size of those labels.
+#'                          Cell-type columns have long names, so they get a smaller legend and
+#'                          labels by default (see the size parameters).
+#' @param label_size        Size of those labels (default 12; 6.7 for cell-type columns).
+#' @param repel             Avoid overlapping labels. Default NULL: TRUE for cell-type columns.
+#' @param raster            Rasterize the points. Default NULL: FALSE for cell-type columns,
+#'                          Seurat's automatic choice otherwise.
 #' @param ...               Further arguments passed to Seurat::DimPlot().
 #' @return A ggplot object.
 #' @export
 plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
-                      pt_size = 1.5, legend_text_size = 32,
-                      legend_key_cm = 2, legend_point_size = 10,
+                      pt_size = 1.5, legend_text_size = NULL,
+                      legend_key_cm = NULL, legend_point_size = NULL,
                       axis_title_size = 30, axis_text_size = 24,
-                      label = NULL, label_size = 12, ...) {
-  if (is.null(label)) label <- grepl("^(seurat_clusters|celltype)", group_by)
+                      label = NULL, label_size = NULL,
+                      repel = NULL, raster = NULL, ...) {
+  is_celltype <- grepl("^celltype", group_by)
+
+  if (is.null(label))             label             <- is_celltype || group_by == "seurat_clusters"
+  if (is.null(legend_text_size))  legend_text_size  <- if (is_celltype) 11.2 else 32
+  if (is.null(legend_key_cm))     legend_key_cm     <- if (is_celltype) 1.2  else 2
+  if (is.null(legend_point_size)) legend_point_size <- if (is_celltype) 6    else 10
+  if (is.null(label_size))        label_size        <- if (is_celltype) 6.7  else 12
+  if (is.null(repel))             repel             <- is_celltype
+  if (is.null(raster) && is_celltype) raster <- FALSE
 
   DimPlot(obj, group.by = group_by, cols = colors, pt.size = pt_size,
-          label = label, label.size = label_size, ...) +
+          label = label, label.size = label_size, repel = repel,
+          raster = raster, ...) +
     labs(title = NULL, x = "umap 1", y = "umap 2") +
     guides(color = guide_legend(override.aes = list(size = legend_point_size))) +
     theme(

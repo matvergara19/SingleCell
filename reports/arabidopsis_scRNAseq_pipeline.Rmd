@@ -1153,11 +1153,7 @@ plot_marker_dotplot(
 )
 
 save_pdf(
-  plot_umap(
-    ath_sc, "celltype", repel = TRUE, raster = FALSE,
-    legend_text_size = 11.2, legend_key_cm = 1.2, legend_point_size = 6,
-    label_size = 6.7
-  ),
+  plot_umap(ath_sc, "celltype"),
   "umap_annotation_biblio.pdf"
 )
 
