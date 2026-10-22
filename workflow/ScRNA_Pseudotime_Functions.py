@@ -341,10 +341,11 @@ def draw_graph_basis(adata):
 
 
 # Puts the legend of a trajectory figure fully inside the image, to the right of
-# the plot and in the same style as the UMAP legends (plot_celltype_umap). Axes,
-# titles and point sizes are left untouched.
+# the plot and in the same style as the UMAP legends (plot_celltype_umap). The
+# canvas is made wider instead of squeezing the plot, so the plot keeps its size.
+# Axes, titles and point sizes are left untouched.
 def fit_legend_inside(fig, ax, legend_text_size=28, legend_point_size=17,
-                      legend_x=1.12, left=0.12, right=0.58):
+                      legend_x=1.04, extra_width_in=6.5):
     leg = ax.get_legend()
     if leg is None:
         return
@@ -368,7 +369,14 @@ def fit_legend_inside(fig, ax, legend_text_size=28, legend_point_size=17,
         loc="center left", bbox_to_anchor=(legend_x, 0.5),
         fontsize=legend_text_size, frameon=False, labelspacing=0.7,
     )
-    fig.subplots_adjust(left=left, right=right)
+
+    # Wider canvas, same absolute size and position of the plot area.
+    pos        = ax.get_position()
+    old_w, h_in = fig.get_size_inches()
+    new_w      = old_w + extra_width_in
+    fig.set_size_inches(new_w, h_in, forward=True)
+    ax.set_position([pos.x0 * old_w / new_w, pos.y0,
+                     pos.width * old_w / new_w, pos.height])
 
 
 # Saves the force-directed tree graph colored by cell type.
@@ -480,7 +488,8 @@ def plot_pseudotime_trajectory(
         title += f"\n{param_label}"
     ax.set_title(title)
     fit_legend_inside(fig, ax)
-    save_plot_18x18(fig, os.path.join(output_dir, f"{name}_pseudotime_trajectory.pdf"))
+    fig.savefig(os.path.join(output_dir, f"{name}_pseudotime_trajectory.pdf"),
+                dpi=PLOT_DPI, facecolor="white")
 
     if show_inline:
         pass
@@ -525,7 +534,7 @@ def plot_root_cell(adata, name, output_dir, show_inline=False, param_label=None)
     mark_root_cell(fig.axes[0], plot_data, draw_graph_basis(plot_data))
     fit_legend_inside(fig, fig.axes[0])
     out_file = os.path.join(output_dir, f"{name}_root_cell.pdf")
-    save_plot_18x18(fig, out_file)
+    fig.savefig(out_file, dpi=PLOT_DPI, facecolor="white")
 
     if show_inline:
         pass
