@@ -1606,6 +1606,18 @@ Cytoscape. Co-expression has no direction: `TF` and `TARGET` only tell which
 gene of the pair is the transcription factor (when both are TFs, the order is
 arbitrary).
 
+The file is tab-separated, one interaction per row. These are its first rows
+(columns aligned here for reading):
+
+```
+TF         TARGET     weight
+AT1G01380  AT4G36250  0.200217019734875
+AT1G01720  AT5G59820  0.230731043800715
+AT1G01720  AT5G08790  0.228962029137792
+AT1G01720  AT5G63790  0.222149570169148
+AT1G01720  AT1G76600  0.222010840386788
+```
+
 ```{r section_17_tf_coexpression_network}
 run_hdwgcna_tf_network(
   seurat_obj      = ath_sc,
