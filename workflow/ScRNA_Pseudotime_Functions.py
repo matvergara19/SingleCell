@@ -340,6 +340,37 @@ def draw_graph_basis(adata):
     )
 
 
+# Puts the legend of a trajectory figure fully inside the image, to the right of
+# the plot and in the same style as the UMAP legends (plot_celltype_umap). Axes,
+# titles and point sizes are left untouched.
+def fit_legend_inside(fig, ax, legend_text_size=28, legend_point_size=17,
+                      legend_x=1.12, left=0.12, right=0.58):
+    leg = ax.get_legend()
+    if leg is None:
+        return
+    handles = getattr(leg, "legend_handles", None) or leg.legendHandles
+    labels  = [t.get_text() for t in leg.get_texts()]
+
+    def _color(h):
+        try:
+            return h.get_facecolor()[0]
+        except Exception:
+            return h.get_markerfacecolor()
+
+    new_handles = [
+        plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=_color(h),
+                   markersize=legend_point_size)
+        for h in handles
+    ]
+    leg.remove()
+    ax.legend(
+        new_handles, labels,
+        loc="center left", bbox_to_anchor=(legend_x, 0.5),
+        fontsize=legend_text_size, frameon=False, labelspacing=0.7,
+    )
+    fig.subplots_adjust(left=left, right=right)
+
+
 # Saves the force-directed tree graph colored by cell type.
 def plot_trajectory_graphs(
     adata,
@@ -355,6 +386,7 @@ def plot_trajectory_graphs(
     fig, ax = plt.subplots(figsize=PLOT_FIGSIZE)
     scf.pl.graph(adata, color_cells=annotation_col, ax=ax, show=False)
     ax.set_title(f"{ax.get_title()}{title_suffix}")
+    fit_legend_inside(fig, ax)
     fig.savefig(os.path.join(output_dir, f"{name}_annotation.pdf"), dpi=PLOT_DPI, facecolor="white")
 
     plt.close(fig)
@@ -447,6 +479,7 @@ def plot_pseudotime_trajectory(
     if param_label:
         title += f"\n{param_label}"
     ax.set_title(title)
+    fit_legend_inside(fig, ax)
     save_plot_18x18(fig, os.path.join(output_dir, f"{name}_pseudotime_trajectory.pdf"))
 
     if show_inline:
@@ -490,6 +523,7 @@ def plot_root_cell(adata, name, output_dir, show_inline=False, param_label=None)
         return_fig         = True,
     )
     mark_root_cell(fig.axes[0], plot_data, draw_graph_basis(plot_data))
+    fit_legend_inside(fig, fig.axes[0])
     out_file = os.path.join(output_dir, f"{name}_root_cell.pdf")
     save_plot_18x18(fig, out_file)
 
