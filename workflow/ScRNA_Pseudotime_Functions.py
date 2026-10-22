@@ -483,6 +483,19 @@ def plot_pseudotime_trajectory(
         show       = False,
     )
     mark_root_cell(ax, adata, basis)
+
+    # Same axes as the nodes-only figure (plot_trajectory_graphs): left and bottom
+    # axis lines with FA1 / FA2 labels, no ticks (frameon=False above hides them).
+    layout = basis.replace("draw_graph_", "").upper()
+    ax.set_axis_on()
+    ax.set_frame_on(True)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlabel(f"{layout}1")
+    ax.set_ylabel(f"{layout}2")
+
     title = f"{name} — pseudotime trajectory (red dot = root cell)"
     if param_label:
         title += f"\n{param_label}"
