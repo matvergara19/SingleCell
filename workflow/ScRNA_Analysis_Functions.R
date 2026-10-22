@@ -3524,10 +3524,11 @@ build_logfc_heatmap <- function(logfc_table,
                                 output_dir,
                                 limits     = c(-5, 5),
                                 cell_order = NULL,
-                                pdf_width  = 18,
-                                pdf_height = 18,
                                 column_names_size = 18,
-                                column_width_cm   = 1.5) {
+                                column_width_cm   = 1.5,
+                                body_height_cm    = 20,
+                                pdf_width  = NULL,
+                                pdf_height = NULL) {
 
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -3552,14 +3553,16 @@ build_logfc_heatmap <- function(logfc_table,
     mat <- mat[, ordered_cols, drop = FALSE]
   }
 
-  # Fixed column width: total heatmap width = columns + row dendrogram, so the
-  # columns do not stretch with the PDF width (the page just has extra margin).
-  dend_cm <- 4
+  # Fixed size: column width and body height are set in cm. Total width = columns
+  # + row dendrogram; total height = body + title and column labels (estimated).
+  dend_cm  <- 4
+  extra_cm <- 7
 
   ht <- ComplexHeatmap::Heatmap(
     mat,
     name = "log2FC",
-    width = grid::unit(ncol(mat) * column_width_cm + dend_cm, "cm"),
+    width  = grid::unit(ncol(mat) * column_width_cm + dend_cm, "cm"),
+    height = grid::unit(body_height_cm + extra_cm, "cm"),
     col  = circlize::colorRamp2(c(limits[1], 0, limits[2]), c("blue", "black", "yellow")),
 
     cluster_rows    = TRUE,          # hierarchical row ordering
@@ -3584,9 +3587,23 @@ build_logfc_heatmap <- function(logfc_table,
     )
   )
 
+  pad <- grid::unit(c(3, 3, 3, 3), "mm")
+
+  # PDF size: by default measured from the drawn heatmap (plus legend), so the
+  # page fits the figure without extra white margin.
+  if (is.null(pdf_width) || is.null(pdf_height)) {
+    pdf(NULL)
+    drawn <- ComplexHeatmap::draw(ht, merge_legend = TRUE, padding = pad)
+    w_in  <- grid::convertX(ComplexHeatmap:::width(drawn),  "inches", valueOnly = TRUE)
+    h_in  <- grid::convertY(ComplexHeatmap:::height(drawn), "inches", valueOnly = TRUE)
+    dev.off()
+    if (is.null(pdf_width))  pdf_width  <- w_in
+    if (is.null(pdf_height)) pdf_height <- h_in
+  }
+
   pdf(file.path(output_dir, paste0("heatmap_", contrast_tag, ".pdf")),
       width = pdf_width, height = pdf_height)
-  ComplexHeatmap::draw(ht, merge_legend = TRUE, padding = grid::unit(c(2, 2, 2, 10), "mm"))
+  ComplexHeatmap::draw(ht, merge_legend = TRUE, padding = pad)
   dev.off()
 
   invisible(NULL)
