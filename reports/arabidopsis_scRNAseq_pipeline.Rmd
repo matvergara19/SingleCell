@@ -1844,7 +1844,7 @@ Representative outputs from Section 21 for the epidermis-cotyledon-only trajecto
 
 ## Section 22 - Plot genes on trajectory
 
-This section plots the expression of selected genes on the fitted epidermis
+This section plots the expression of a selected gene on the fitted epidermis
 cotyledon trajectory. `plot_genes_on_trajectory()` takes the genes (and optional
 panel titles), so changing `genes` is the only thing needed to inspect another
 gene. The figure is saved automatically in the run folder (`gene_plots/`), named
@@ -1853,32 +1853,13 @@ path is printed. The cells with the highest expression are drawn on top
 (`sort_order = TRUE`, the equivalent of `order = TRUE` in Seurat), so they are not
 hidden by the cells that do not express the gene.
 
-Two figures are made. The first shows the **10 most variable genes along
-pseudotime**: the genes labeled in the trend heatmap of Section 23, where the
-heatmap rows are cut into 10 equal blocks and the gene with the highest amplitude
-is taken from each block, so they are spread from the start to the end of the
-trajectory. Section 23 runs after this one, so the list is written here
-(`TOP_VARIABLE_GENES`); it can be refreshed from the Section 23 output. The second
-figure shows **ATML1**, a marker of the epidermis and the gene used as the example
-throughout this report; in the count matrix it is stored as the locus `AT4G21750`,
-so the code uses `AT4G21750` while the panel title shows the gene name followed by
-the locus.
+This section is focused on **ATML1**, a marker of the epidermis and the gene used
+as the example throughout this report. In the count matrix ATML1 is stored as the
+locus `AT4G21750`, so the code uses `AT4G21750` while the panel title shows the
+gene name followed by the locus. The plot shows where ATML1 expression falls on
+the epidermis cotyledon trajectory layout.
 
 ```{python section_22_gene_plots, eval=FALSE}
-# 1) The 10 most variable genes labeled in the Section 23 heatmap
-TOP_VARIABLE_GENES = [
-    "AT2G02010", "AT1G14540", "AT1G14870", "AT1G19020", "ATCG00340",
-    "AT2G34420", "AT1G20620", "AT5G10430", "AT2G21140", "AT5G23820",
-]
-plot_genes_on_trajectory(
-    adata_traj,
-    genes    = TOP_VARIABLE_GENES,
-    run_dir  = selected_trajectory_dir,
-    filename = "trajectory_genes_top10_variable.pdf",
-    ncols    = 5,
-)
-
-# 2) ATML1, the gene of interest, with a readable panel title
 plot_genes_on_trajectory(
     adata_traj,
     genes    = ["AT4G21750"],                         # ATML1
@@ -1890,19 +1871,11 @@ plot_genes_on_trajectory(
 print("SECTION 22 COMPLETE: gene trajectory plots saved")
 ```
 
-Representative outputs from Section 22:
+Representative output from Section 22:
 
 ```{=latex}
 \begin{center}
-\includegraphics[width=0.85\linewidth]{assets/pseudotime_gene_plots_top10_variable.pdf}
-\end{center}
-```
-
-Expression of the 10 most variable genes on the epidermis cotyledon trajectory.
-
-```{=latex}
-\begin{center}
-\includegraphics[width=0.45\linewidth]{assets/pseudotime_gene_plots_ATML1.pdf}
+\includegraphics[width=0.6\linewidth]{assets/pseudotime_gene_plots_ATML1.pdf}
 \end{center}
 ```
 

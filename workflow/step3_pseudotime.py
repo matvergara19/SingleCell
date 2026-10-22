@@ -77,21 +77,7 @@ print("SECTION 21 COMPLETE: trajectory inference saved")
 # ==============================================================================
 # Section 22 - Plot genes on trajectory
 # ==============================================================================
-# 1) The 10 most variable genes labeled in the Section 23 heatmap (spread along
-#    pseudotime). The list is fixed here because Section 23 runs after this one.
-TOP_VARIABLE_GENES = [
-    "AT2G02010", "AT1G14540", "AT1G14870", "AT1G19020", "ATCG00340",
-    "AT2G34420", "AT1G20620", "AT5G10430", "AT2G21140", "AT5G23820",
-]
-plot_genes_on_trajectory(
-    adata_traj,
-    genes    = TOP_VARIABLE_GENES,
-    run_dir  = selected_trajectory_dir,
-    filename = "trajectory_genes_top10_variable.pdf",
-    ncols    = 5,
-)
-
-# 2) ATML1, the gene of interest, with a readable panel title
+# ATML1, the gene of interest, with a readable panel title
 plot_genes_on_trajectory(
     adata_traj,
     genes    = ["AT4G21750"],                         # ATML1
