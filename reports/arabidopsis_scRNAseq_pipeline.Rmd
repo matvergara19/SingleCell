@@ -2195,6 +2195,12 @@ confirms the original label, so `reassign` maps every Mesophyll subcluster back 
 `"Mesophyll"` and no cell is relabeled; this is the pattern to use when the
 inspection shows that the original annotation was already correct.
 
+The names of `reassign` are looked up in the column given by `annot_col`. Because
+`Mesophyll` is a label of `celltype_grouped` (created in Supplementary Section S2)
+and not of `celltype`, which only has `Mesophyll.1` and `Mesophyll.2`, the call uses
+`annot_col = "celltype_grouped"`; S2 must be run first, otherwise the function stops
+with a message that says so.
+
 Then `curate_clusters()` applies those manual labels and stores the result in
 `celltype_curated`. The final curated UMAP is saved as
 `results/05_curation/umap_curated.pdf`. This block is not executed automatically
@@ -2213,13 +2219,16 @@ inspect_subcluster_markers(
 # 2. Map each cluster's subclusters to labels ("others" = any ID not listed),
 #    then curate them in one call. Here Mesophyll's subclusters all map back
 #    to "Mesophyll" (no relabeling), which is the pattern to use when the
-#    subcluster inspection confirms the original label was already correct:
+#    subcluster inspection confirms the original label was already correct.
+#    The keys of `reassign` are labels of celltype_grouped (created in
+#    Supplementary Section S2), so annot_col and source_col point to that column:
 reassign <- list(
   "Mesophyll" = c("others" = "Mesophyll")
 )
 ath_sc <- curate_clusters(
   ath_sc, reassign,
-  marker_table = marker_table, output_dir = output_dir
+  marker_table = marker_table, output_dir = output_dir,
+  annot_col = "celltype_grouped", source_col = "celltype_grouped"
 )
 
 # 3. Save the curated annotation UMAP

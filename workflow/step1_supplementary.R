@@ -57,13 +57,16 @@ inspect_subcluster_markers(
 # 2. Map each cluster's subclusters to labels ("others" = any ID not listed),
 #    then curate them in one call. Here Mesophyll's subclusters all map back
 #    to "Mesophyll" (no relabeling) -- use this pattern when inspection
-#    confirms the original label was already correct:
+#    confirms the original label was already correct.
+#    The keys of `reassign` are labels of celltype_grouped (created in
+#    Supplementary Section S2), so annot_col and source_col point to that column:
 reassign <- list(
   "Mesophyll" = c("others" = "Mesophyll")
 )
 ath_sc <- curate_clusters(
   ath_sc, reassign,
-  marker_table = marker_table, output_dir = output_dir
+  marker_table = marker_table, output_dir = output_dir,
+  annot_col = "celltype_grouped", source_col = "celltype_grouped"
 )
 
 # 3. Save the curated annotation UMAP

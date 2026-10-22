@@ -1266,7 +1266,20 @@ plot_subcluster_umap <- function(obj, label, output_dir) {
 subcluster_cell_type <- function(obj, ctype, annot_col = "celltype_grouped",
                             resolution = 0.3, dims = 1:20) {
 
-  sub <- subset(obj, cells = colnames(obj)[obj@meta.data[[annot_col]] %in% ctype])
+  if (!annot_col %in% colnames(obj@meta.data)) {
+    stop("Column '", annot_col, "' not found in the object. ",
+         if (annot_col == "celltype_grouped")
+           "Run Supplementary Section S2 first: it creates celltype_grouped. " else "",
+         "Available annotation columns: ",
+         paste(grep("^celltype", colnames(obj@meta.data), value = TRUE), collapse = ", "))
+  }
+  keep <- colnames(obj)[obj@meta.data[[annot_col]] %in% ctype]
+  if (length(keep) == 0) {
+    stop("No cells with ", annot_col, " in {", paste(ctype, collapse = ", "), "}. ",
+         "Labels available in '", annot_col, "': ",
+         paste(sort(unique(as.character(obj@meta.data[[annot_col]]))), collapse = ", "))
+  }
+  sub <- subset(obj, cells = keep)
 
   # For small subsets, recompute variable features
   ncells <- ncol(sub)
@@ -1464,6 +1477,10 @@ apply_subcluster_reassignment <- function(obj, subcluster_list, reassign,
 #' @param reassign     Named list (keys = cluster IDs) of subcluster->label maps.
 #' @param marker_table Marker table passed to inspect_subcluster_markers.
 #' @param output_dir   Directory for the per-cluster inspection figures.
+#' @param annot_col    Column where the keys of `reassign` are looked up
+#'   (default "celltype"). Use "celltype_grouped" when the keys are labels
+#'   created by Supplementary Section S2 (e.g. "Mesophyll", which merges
+#'   Mesophyll.1 and Mesophyll.2).
 #' @param source_col   Baseline annotation column (default "celltype").
 #' @param dest_col     Output curated column (default "celltype_curated").
 #' @param resolution   Subcluster resolution (default 0.3).
@@ -1471,13 +1488,14 @@ apply_subcluster_reassignment <- function(obj, subcluster_list, reassign,
 #' @return Updated Seurat object with dest_col populated.
 #' @export
 curate_clusters <- function(obj, reassign, marker_table, output_dir,
+                            annot_col  = "celltype",
                             source_col = "celltype",
                             dest_col   = "celltype_curated",
                             resolution = 0.3, dims = 1:20) {
   sub_objs <- list()
   for (cl in names(reassign)) {
     res <- inspect_subcluster_markers(
-      obj, cluster_id = cl, marker_table = marker_table,
+      obj, cluster_id = cl, marker_table = marker_table, annot_col = annot_col,
       output_dir = output_dir, resolution = resolution, dims = dims
     )
     sub_objs[[cl]] <- res$sub_obj
