@@ -2007,7 +2007,7 @@ plot_marker_dotplot <- function(seurat_obj,
                                      base_size       = 18,
                                      celltype_text_size = 24,
                                      gene_text_size  = 24,
-                                     legend_text_size = 14,
+                                     legend_text_size = 17,
                                      name_gene       = TRUE) {
 
   obj   <- seurat_obj
