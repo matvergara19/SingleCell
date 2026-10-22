@@ -230,10 +230,7 @@ plot_marker_dotplot(
 )
 
 save_pdf(
-  DimPlot(
-    ath_sc, group.by = "celltype",
-    label = TRUE, repel = TRUE, raster = FALSE
-  ),
+  plot_umap(ath_sc, "celltype", repel = TRUE, raster = FALSE),
   "umap_annotation_biblio.pdf"
 )
 
@@ -254,12 +251,12 @@ Idents(ath_sc) <- "celltype"
 gene_tag <- paste(gene, collapse = "_")
 
 save_vln(
-  VlnPlot(ath_sc, features = gene),
+  plot_gene_violin(ath_sc, gene),
   paste0("vln_gene_", gene_tag, ".pdf")
 )
 
 save_pdf(
-  FeaturePlot(ath_sc, features = gene),
+  plot_gene_umap(ath_sc, gene),
   paste0("feature_gene_", gene_tag, ".pdf")
 )
 

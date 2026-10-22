@@ -194,7 +194,8 @@ summarize_nfeature_plot <- function(obj_list, labels = NULL, colores = NULL) {
 #' @param axis_title_size   Size of the axis titles.
 #' @param axis_text_size    Size of the axis tick labels.
 #' @param label             Print the group names on the plot. Default NULL: TRUE when
-#'                          group_by is "seurat_clusters" (cluster numbers), FALSE otherwise.
+#'                          group_by is "seurat_clusters" or a cell-type column
+#'                          (name starting with "celltype"), FALSE otherwise.
 #' @param label_size        Size of those labels.
 #' @param ...               Further arguments passed to Seurat::DimPlot().
 #' @return A ggplot object.
@@ -204,7 +205,7 @@ plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
                       legend_key_cm = 2.5, legend_point_size = 12,
                       axis_title_size = 30, axis_text_size = 24,
                       label = NULL, label_size = 12, ...) {
-  if (is.null(label)) label <- group_by == "seurat_clusters"
+  if (is.null(label)) label <- grepl("^(seurat_clusters|celltype)", group_by)
 
   DimPlot(obj, group.by = group_by, cols = colors, pt.size = pt_size,
           label = label, label.size = label_size, ...) +
@@ -216,6 +217,66 @@ plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
       axis.title      = element_text(size = axis_title_size),
       axis.text       = element_text(size = axis_text_size)
     )
+}
+
+#' Gene Expression on the UMAP
+#'
+#' FeaturePlot with the same style as plot_umap(): "umap 1" / "umap 2" axis labels,
+#' enlarged points, legend and axes. The title is dropped for a single gene and
+#' kept (gene name) when several genes are plotted, to tell the panels apart.
+#'
+#' @param obj               Seurat object with a UMAP reduction.
+#' @param features          One gene, or several genes.
+#' @param pt_size           Size of the cell points.
+#' @param legend_text_size  Size of the legend text.
+#' @param legend_key_cm     Size of the legend keys, in cm.
+#' @param axis_title_size   Size of the axis titles.
+#' @param axis_text_size    Size of the axis tick labels.
+#' @param ...               Further arguments passed to Seurat::FeaturePlot().
+#' @return A ggplot (or patchwork) object.
+#' @export
+plot_gene_umap <- function(obj, features, pt_size = 1.5, legend_text_size = 40,
+                           legend_key_cm = 2.5, axis_title_size = 30,
+                           axis_text_size = 24, ...) {
+  p <- FeaturePlot(obj, features = features, pt.size = pt_size, ...) &
+    labs(x = "umap 1", y = "umap 2") &
+    theme(
+      legend.text     = element_text(size = legend_text_size),
+      legend.key.size = unit(legend_key_cm, "cm"),
+      axis.title      = element_text(size = axis_title_size),
+      axis.text       = element_text(size = axis_text_size)
+    )
+
+  if (length(features) == 1) p <- p & labs(title = NULL)
+
+  p
+}
+
+#' Gene Expression Violin by Identity
+#'
+#' VlnPlot with enlarged axes and legend. The title is dropped for a single gene
+#' and kept (gene name) when several genes are plotted.
+#'
+#' @param obj               Seurat object (identities already set).
+#' @param features          One gene, or several genes.
+#' @param legend_text_size  Size of the legend text.
+#' @param axis_title_size   Size of the axis titles.
+#' @param axis_text_size    Size of the axis tick labels (cell types and values).
+#' @param ...               Further arguments passed to Seurat::VlnPlot().
+#' @return A ggplot (or patchwork) object.
+#' @export
+plot_gene_violin <- function(obj, features, legend_text_size = 40,
+                             axis_title_size = 30, axis_text_size = 24, ...) {
+  p <- VlnPlot(obj, features = features, ...) &
+    theme(
+      legend.text = element_text(size = legend_text_size),
+      axis.title  = element_text(size = axis_title_size),
+      axis.text   = element_text(size = axis_text_size)
+    )
+
+  if (length(features) == 1) p <- p & labs(title = NULL)
+
+  p
 }
 
 
@@ -1925,6 +1986,9 @@ plot_heatmap <- function(mat,
 #' @param dot_scale         Dot size scaling factor.
 #' @param base_size         Base font size.
 #' @param celltype_text_size Font size of the cell-type labels (x axis).
+#' @param gene_text_size    Font size of the gene labels (y axis).
+#' @param legend_text_size  Font size of the legend text and titles.
+#' @param legend_key_cm     Size of the legend keys, in cm.
 #' @param name_gene         If TRUE (default), label genes with their symbol
 #'                          (e.g. "OPS"); if FALSE, label them with the gene ID
 #'                          only (e.g. "AT3G09070"). Tables without a symbol
@@ -1942,7 +2006,10 @@ plot_marker_dotplot <- function(seurat_obj,
                                      height          = 18,
                                      dot_scale       = 12,
                                      base_size       = 18,
-                                     celltype_text_size = 22,
+                                     celltype_text_size = 24,
+                                     gene_text_size  = 24,
+                                     legend_text_size = 40,
+                                     legend_key_cm   = 2.5,
                                      name_gene       = TRUE) {
 
   obj   <- seurat_obj
@@ -2021,10 +2088,13 @@ plot_marker_dotplot <- function(seurat_obj,
     theme_minimal(base_size = base_size) +
     theme(
       axis.text.x  = element_text(angle = 45, hjust = 1, size = celltype_text_size),
-      axis.text.y  = element_text(size = base_size - 4, face = "italic"),
+      axis.text.y  = element_text(size = gene_text_size, face = "italic"),
       axis.title   = element_blank(),
       panel.border = element_rect(color = "black", fill = NA),
-      legend.position = "right"
+      legend.position = "right",
+      legend.text     = element_text(size = legend_text_size),
+      legend.title    = element_text(size = legend_text_size),
+      legend.key.size = unit(legend_key_cm, "cm")
     )
 
   figure$layers[[1]]$aes_params$alpha <- 1   # solid dots
