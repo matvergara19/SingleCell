@@ -5575,7 +5575,8 @@ plot_tf_de_network <- function(net, output_dir,
       legend.position = "right",
       legend.text     = ggplot2::element_text(size = legend_text_size),
       legend.key.size = ggplot2::unit(legend_key_cm, "cm"),
-      plot.title      = ggplot2::element_text(size = 11, face = "bold")
+      legend.spacing.y = ggplot2::unit(1.5, "cm"),   # gap between the two legend blocks
+      plot.title      = ggplot2::element_text(size = 11, face = "bold", hjust = 0.5)
     )
 
   out_file <- file.path(output_dir, output_pdf)
