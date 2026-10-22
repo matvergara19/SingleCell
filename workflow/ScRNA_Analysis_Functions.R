@@ -237,8 +237,7 @@ plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
 #' Gene Expression on the UMAP
 #'
 #' FeaturePlot with the same style as plot_umap(): "umap 1" / "umap 2" axis labels,
-#' enlarged points, legend and axes. The title is dropped for a single gene and
-#' kept (gene name) when several genes are plotted, to tell the panels apart.
+#' enlarged points, legend and axes. Each panel is titled with its gene name.
 #'
 #' @param obj               Seurat object with a UMAP reduction.
 #' @param features          One gene, or several genes.
@@ -248,7 +247,7 @@ plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
 #' @param axis_title_size   Size of the axis titles.
 #' @param axis_text_size    Size of the axis tick labels.
 #' @param order             Plot the cells with the highest expression on top (default TRUE).
-#' @param title_size        Size of the gene-name titles (shown only with several genes).
+#' @param title_size        Size of the gene-name titles.
 #' @param ...               Further arguments passed to Seurat::FeaturePlot().
 #' @return A ggplot (or patchwork) object.
 #' @export
@@ -266,22 +265,20 @@ plot_gene_umap <- function(obj, features, pt_size = 1.5, legend_text_size = 40,
       plot.title      = element_text(size = title_size)
     )
 
-  if (length(features) == 1) p <- p & labs(title = NULL)
 
   p
 }
 
 #' Gene Expression Violin by Identity
 #'
-#' VlnPlot with enlarged axes, without legend and without x-axis title. The plot
-#' title is dropped for a single gene and kept (gene name) when several genes
-#' are plotted.
+#' VlnPlot with enlarged axes, without legend and without x-axis title. Each panel
+#' is titled with its gene name.
 #'
 #' @param obj               Seurat object (identities already set).
 #' @param features          One gene, or several genes.
 #' @param axis_title_size   Size of the axis titles.
 #' @param axis_text_size    Size of the axis tick labels (cell types and values).
-#' @param title_size        Size of the gene-name titles (shown only with several genes).
+#' @param title_size        Size of the gene-name titles.
 #' @param ...               Further arguments passed to Seurat::VlnPlot().
 #' @return A ggplot (or patchwork) object.
 #' @export
@@ -296,7 +293,6 @@ plot_gene_violin <- function(obj, features, axis_title_size = 30,
       plot.title      = element_text(size = title_size)
     )
 
-  if (length(features) == 1) p <- p & labs(title = NULL)
 
   p
 }
