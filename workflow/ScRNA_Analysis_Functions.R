@@ -1924,6 +1924,7 @@ plot_heatmap <- function(mat,
 #' @param height            PDF height in inches.
 #' @param dot_scale         Dot size scaling factor.
 #' @param base_size         Base font size.
+#' @param celltype_text_size Font size of the cell-type labels (x axis).
 #' @param name_gene         If TRUE (default), label genes with their symbol
 #'                          (e.g. "OPS"); if FALSE, label them with the gene ID
 #'                          only (e.g. "AT3G09070"). Tables without a symbol
@@ -1941,6 +1942,7 @@ plot_marker_dotplot <- function(seurat_obj,
                                      height          = 18,
                                      dot_scale       = 12,
                                      base_size       = 18,
+                                     celltype_text_size = 22,
                                      name_gene       = TRUE) {
 
   obj   <- seurat_obj
@@ -2018,7 +2020,7 @@ plot_marker_dotplot <- function(seurat_obj,
     coord_flip() +
     theme_minimal(base_size = base_size) +
     theme(
-      axis.text.x  = element_text(angle = 45, hjust = 1, size = base_size - 4),
+      axis.text.x  = element_text(angle = 45, hjust = 1, size = celltype_text_size),
       axis.text.y  = element_text(size = base_size - 4, face = "italic"),
       axis.title   = element_blank(),
       panel.border = element_rect(color = "black", fill = NA),
