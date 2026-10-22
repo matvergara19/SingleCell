@@ -3478,6 +3478,7 @@ run_simple_go_enrichment <- function(diff_table,
     scale_size(range = c(4, 12)) +
     theme(
       plot.title   = element_text(size = 30, face = "bold"),
+      plot.title.position = "plot",
       axis.text.y  = element_text(size = 28),
       axis.text.x  = element_text(size = 22),
       axis.title.x = element_text(size = 26),
@@ -3513,6 +3514,9 @@ run_go_enrichment_for_contrast <- function(results_dir,
 
   for (deseq2_file in deseq2_files) {
     cell_type <- gsub("^DESeq2_|\\.csv$", "", basename(deseq2_file))
+    # the DESeq2 file names end with the contrast tag: drop it, so titles and output
+    # names read "Mesophyll_1" and GO_Mesophyll_1_<contrast>_BP (not repeated twice)
+    cell_type <- sub(paste0("_", contrast_tag, "$"), "", cell_type)
 
     deseq2_results <- read.csv(deseq2_file, row.names = 1)
     sig_genes <- rownames(deseq2_results)[deseq2_results$padj < padj_cutoff]

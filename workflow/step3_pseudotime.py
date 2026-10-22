@@ -91,13 +91,13 @@ plot_genes_on_trajectory(
     ncols    = 5,
 )
 
-# 2) Two genes of interest, with readable panel titles
+# 2) ATML1, the gene of interest, with a readable panel title
 plot_genes_on_trajectory(
     adata_traj,
-    genes    = ["AT4G21750", "AT3G10525"],            # ATML1, LGO
-    titles   = ["ATML1 (AT4G21750)", "LGO (AT3G10525)"],
+    genes    = ["AT4G21750"],                         # ATML1
+    titles   = ["ATML1 (AT4G21750)"],
     run_dir  = selected_trajectory_dir,
-    filename = "trajectory_genes_ATML1_LGO.pdf",
+    filename = "trajectory_genes_ATML1.pdf",
 )
 
 print("SECTION 22 COMPLETE: gene trajectory plots saved")
@@ -106,7 +106,7 @@ print("SECTION 22 COMPLETE: gene trajectory plots saved")
 # Section 23 - Gene trends
 # ==============================================================================
 TOP_N           = 10
-HIGHLIGHT_GENES = ["AT3G24140", "AT3G10525"]
+HIGHLIGHT_GENES = ["AT4G21750"]
 ORDERING        = "max"
 SPLINE_DF       = 3
 
