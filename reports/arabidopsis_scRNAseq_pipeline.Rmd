@@ -1594,6 +1594,18 @@ metacells, the minimum module size, the edge-strength threshold (a minimum TOM
 weight) and how many hub TFs are labeled. The network output is saved in
 `results/08_networks/`.
 
+Besides the figure, the function exports the TF-target interaction file
+`TF_TARGET_interaccion.tsv` to `results/08_networks/`. It has three columns,
+`TF`, `TARGET` and `weight` (the TOM value), and it keeps only the gene pairs
+with at least one TF whose weight reaches `tom_threshold`. This is the file to
+import into Cytoscape (File > Import > Network from File, with `TF` as source
+node, `TARGET` as target node and `weight` as edge attribute). The network drawn
+in R is only a basic visualization made with the `igraph` and `ggraph`
+packages; for a final figure, build the network from the interaction file in
+Cytoscape. Co-expression has no direction: `TF` and `TARGET` only tell which
+gene of the pair is the transcription factor (when both are TFs, the order is
+arbitrary).
+
 ```{r section_17_tf_coexpression_network}
 run_hdwgcna_tf_network(
   seurat_obj      = ath_sc,
@@ -1994,6 +2006,7 @@ results/
 |   |-- GO_<cell_type>_<tag>_BP.tsv
 |   `-- GO_<cell_type>_<tag>_BP_bubble.pdf
 |-- 08_networks/
+|   |-- TF_TARGET_interaccion.tsv
 |   |-- edges_unified.tsv
 |   |-- nodes_unified.tsv
 |   |-- modules_unified.tsv

@@ -5576,7 +5576,8 @@ plot_tf_de_network <- function(net, output_dir,
 #' genes, exports the edge list (source | target | weight), then filters to
 #' TF-containing pairs (AtTFDB) and draws the TF network colored by DE
 #' direction. No module-visualization plots are produced; only the gene-gene
-#' network and the TF network figure. Thin wrapper over run_unified_hdwgcna(),
+#' network and the TF network figure. It also writes TF_TARGET_interaccion.tsv
+#' (columns TF, TARGET, weight) to import the TF-target network into Cytoscape. Thin wrapper over run_unified_hdwgcna(),
 #' plot_hdwgcna_network() and build/plot_tf_de_network().
 #'
 #' @param seurat_obj     Curated Seurat object.
@@ -5639,6 +5640,24 @@ run_hdwgcna_tf_network <- function(seurat_obj,
 
   edges_tf <- edges_all[edges_all$weight >= tom_threshold, ]
   net_tf   <- build_tf_network(edges_tf, tfs, de_mat)
+
+  # TF-target interaction table (TF | TARGET | weight) for Cytoscape. Pairs with
+  # one TF: the TF is the source. TF-TF pairs keep their original order.
+  e_tf       <- net_tf$edge_df
+  tf_first   <- e_tf$source %in% tfs | !(e_tf$target %in% tfs)
+  tf_target  <- data.frame(
+    TF     = ifelse(tf_first, e_tf$source, e_tf$target),
+    TARGET = ifelse(tf_first, e_tf$target, e_tf$source),
+    weight = e_tf$weight,
+    stringsAsFactors = FALSE
+  )
+  tf_target  <- tf_target[order(tf_target$TF, -tf_target$weight), ]
+  write.table(tf_target, file.path(output_dir, "TF_TARGET_interaccion.tsv"),
+              sep = "\t", quote = FALSE, row.names = FALSE)
+  message("TF-target interaction file saved: ",
+          file.path(output_dir, "TF_TARGET_interaccion.tsv"),
+          " (", nrow(tf_target), " interactions)")
+
   plot_tf_de_network(net_tf,
                      output_dir    = output_dir,
                      layout        = "graphopt",
