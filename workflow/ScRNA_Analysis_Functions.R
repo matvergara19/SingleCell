@@ -247,13 +247,15 @@ plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
 #' @param legend_key_cm     Size of the legend keys, in cm.
 #' @param axis_title_size   Size of the axis titles.
 #' @param axis_text_size    Size of the axis tick labels.
+#' @param order             Plot the cells with the highest expression on top (default TRUE).
 #' @param ...               Further arguments passed to Seurat::FeaturePlot().
 #' @return A ggplot (or patchwork) object.
 #' @export
 plot_gene_umap <- function(obj, features, pt_size = 1.5, legend_text_size = 40,
                            legend_key_cm = 2.5, axis_title_size = 30,
-                           axis_text_size = 24, ...) {
-  p <- FeaturePlot(obj, features = features, pt.size = pt_size, ...) &
+                           axis_text_size = 24, order = TRUE, ...) {
+  p <- FeaturePlot(obj, features = features, pt.size = pt_size,
+                   order = order, ...) &
     labs(x = "umap 1", y = "umap 2") &
     theme(
       legend.text     = element_text(size = legend_text_size),
@@ -269,24 +271,25 @@ plot_gene_umap <- function(obj, features, pt_size = 1.5, legend_text_size = 40,
 
 #' Gene Expression Violin by Identity
 #'
-#' VlnPlot with enlarged axes and legend. The title is dropped for a single gene
-#' and kept (gene name) when several genes are plotted.
+#' VlnPlot with enlarged axes, without legend and without x-axis title. The plot
+#' title is dropped for a single gene and kept (gene name) when several genes
+#' are plotted.
 #'
 #' @param obj               Seurat object (identities already set).
 #' @param features          One gene, or several genes.
-#' @param legend_text_size  Size of the legend text.
 #' @param axis_title_size   Size of the axis titles.
 #' @param axis_text_size    Size of the axis tick labels (cell types and values).
 #' @param ...               Further arguments passed to Seurat::VlnPlot().
 #' @return A ggplot (or patchwork) object.
 #' @export
-plot_gene_violin <- function(obj, features, legend_text_size = 40,
-                             axis_title_size = 30, axis_text_size = 24, ...) {
+plot_gene_violin <- function(obj, features, axis_title_size = 30,
+                             axis_text_size = 24, ...) {
   p <- VlnPlot(obj, features = features, ...) &
+    labs(x = NULL) &
     theme(
-      legend.text = element_text(size = legend_text_size),
-      axis.title  = element_text(size = axis_title_size),
-      axis.text   = element_text(size = axis_text_size)
+      legend.position = "none",
+      axis.title      = element_text(size = axis_title_size),
+      axis.text       = element_text(size = axis_text_size)
     )
 
   if (length(features) == 1) p <- p & labs(title = NULL)
