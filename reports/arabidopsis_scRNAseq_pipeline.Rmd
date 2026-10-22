@@ -1890,7 +1890,7 @@ trend signal, and then saves trend heatmaps.
 
 For this report, the run shown here uses the already selected epidermis
 cotyledon trajectory: `nodes=100`, `sigma=0.1`, `lambda=20`, `eigs=3`, and
-`seed=3`. `TOP_N = 10` means the main panel shows the top 10 ranked genes.
+`seed=3`. `TOP_N = 10` means the main panel labels 10 genes. They are spread along the whole pseudotime: the heatmap rows are cut into 10 equal blocks and the gene with the highest amplitude is labeled in each block (`spread_top = True`; with `spread_top = False` the 10 genes with the highest amplitude are labeled instead).
 `HIGHLIGHT_GENES = ["AT3G24140"]` highlights the selected marker using the same fitted trend
 workflow.
 
@@ -1930,7 +1930,7 @@ Representative outputs from Section 23 — epidermis cotyledon gene trends:
 \end{center}
 ```
 
-Left: top 10 ranked genes along pseudotime for the epidermis cotyledon trajectory.
+Left: 10 variable genes spread along pseudotime for the epidermis cotyledon trajectory.
 Right: `AT3G24140` highlighted from the same fitted trend workflow.
 
 ## Section 24 - Final export

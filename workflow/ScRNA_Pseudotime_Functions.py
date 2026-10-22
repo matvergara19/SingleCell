@@ -750,17 +750,42 @@ def strip_segment_frames(ax):
                 p.remove()
 
 
-# Trends plots get their own canvas (24x18, wider than tall) instead of the
-# generic PLOT_FIGSIZE (18x18) used by other plot types — the dendrogram
-# panel looks cramped at a square 18x18 once the tree is a single segment.
-def save_trends_plot(axes_list, pdf_path):
+# Trends plots are the heatmap only (the cells-on-the-tree panel is not drawn,
+# plot_emb=False), so the canvas is narrow (12x18) with room on the right for the
+# gene names.
+def save_trends_plot(axes_list, pdf_path, title=None):
     for ax in axes_list:
         strip_segment_frames(ax)
     fig = axes_list[0].get_figure()
-    fig.set_size_inches(24, 18, forward=True)
-    fig.subplots_adjust(left=0.04, right=0.85, bottom=0.06, top=0.92)
+    fig.set_size_inches(12, 18, forward=True)
+    fig.subplots_adjust(left=0.08, right=0.97, bottom=0.06, top=0.92)
+    if title:
+        fig.suptitle(title, fontsize=22, y=0.975)
     fig.savefig(pdf_path, dpi=PLOT_DPI, facecolor="white")
     plt.close(fig)
+
+
+# Picks top_n genes spread along the whole pseudotime as shown in the heatmap:
+# the heatmap rows are already ordered along pseudotime (ordering = "max"), so the
+# rows are cut into top_n blocks with the same number of genes and, in each block,
+# the gene with the highest amplitude (A) is taken. The labels are therefore
+# evenly spread from the start to the end of the trajectory, instead of piling up
+# where the strongest genes happen to peak.
+def select_genes_across_pseudotime(adata_fitted, genes, top_n, ordering="max"):
+    order = scf.pl.trends(adata_fitted, features=genes, plot_emb=False,
+                          ordering=ordering, return_genes=True, show=False)
+    plt.close("all")
+    order = list(order[0]) if isinstance(order, tuple) else list(order)
+    amp   = adata_fitted.var["A"]
+    blocks = np.array_split(np.arange(len(order)), top_n)
+    picked = []
+    for blk in blocks:
+        if not len(blk):
+            continue
+        # central 60% of the block: keeps the labels apart from each other
+        core = blk[int(0.2 * len(blk)): max(int(0.8 * len(blk)), int(0.2 * len(blk)) + 1)]
+        picked.append(amp.loc[[order[i] for i in core]].idxmax())
+    return picked
 
 
 def run_step29_gene_trends(
@@ -774,6 +799,7 @@ def run_step29_gene_trends(
     spline_df    = 5,
     A_cut        = 0.3,
     p_val_cut    = 0.001,
+    spread_top   = True,
 ):
     output_dir = os.path.join(run_dir, "gene_trends")
     os.makedirs(output_dir, exist_ok=True)
@@ -811,9 +837,13 @@ def run_step29_gene_trends(
     adata_fitted = adata.copy()
     scf.tl.fit(adata_fitted, features=fit_features, n_jobs=n_jobs)
 
-    top_genes = adata_fitted.var.sort_values("A", ascending=False).head(top_n).index.tolist()
+    if spread_top:
+        top_genes = select_genes_across_pseudotime(adata_fitted, fit_features, top_n, ordering)
+    else:
+        top_genes = adata_fitted.var.sort_values("A", ascending=False).head(top_n).index.tolist()
     axes_list = scf.pl.trends(
         adata_fitted,
+        plot_emb           = False,
         highlight_features = top_genes,
         style               = "italic",
         add_outline         = True,
@@ -822,16 +852,19 @@ def run_step29_gene_trends(
         fontsize            = 18,
         ordering            = ordering,
         show                = False,
-        title               = f"{name} — top {top_n} variable genes",
+        title               = f"{name} — top {top_n} variable genes" + (" across pseudotime" if spread_top else ""),
     )
     top_pdf = os.path.join(output_dir, f"step29_gene_trends_top{top_n}_FINAL_24x18.pdf")
-    save_trends_plot(axes_list, top_pdf)
+    save_trends_plot(axes_list, top_pdf,
+                     title=f"{name} — top {top_n} variable genes"
+                           + (" across pseudotime" if spread_top else ""))
     print(f"✓ Top-{top_n} gene trends saved: {top_pdf}")
 
     custom_pdf = None
     if genes_present:
         axes_list = scf.pl.trends(
             adata_fitted,
+            plot_emb           = False,
             highlight_features = genes_present,
             style               = "italic",
             add_outline         = True,
@@ -843,7 +876,7 @@ def run_step29_gene_trends(
             title               = f"{name} — custom selection",
         )
         custom_pdf = os.path.join(output_dir, "step29_gene_trends_highlight_list_FINAL_24x18.pdf")
-        save_trends_plot(axes_list, custom_pdf)
+        save_trends_plot(axes_list, custom_pdf, title=f"{name} — custom selection")
         print(f"✓ Custom selection gene trends saved: {custom_pdf}")
 
     print("STEP 29 COMPLETE: gene trends saved")
