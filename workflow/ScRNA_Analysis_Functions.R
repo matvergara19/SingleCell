@@ -243,6 +243,26 @@ plot_resolution_elbow <- function(seurat_obj, output_dir, filename = "elbow_plot
   invisible(elbow_plot)
 }
 
+#' Compact theme for clustree figures
+#'
+#' Larger legend text and tighter margins and legend spacing, shared by the
+#' clustree figures (run_resolution_sweep(), plot_annotated_clustree()).
+#'
+#' @param legend_text_size  Size of the legend text.
+#' @param legend_title_size Size of the legend titles.
+#' @return A ggplot2 theme.
+#' @export
+theme_clustree <- function(legend_text_size = 26, legend_title_size = 28) {
+  theme(
+    legend.text        = element_text(size = legend_text_size),
+    legend.title       = element_text(size = legend_title_size),
+    legend.key.size    = unit(1.4, "cm"),
+    legend.box.spacing = unit(4, "pt"),
+    legend.spacing.y   = unit(6, "pt"),
+    plot.margin        = margin(4, 4, 4, 4)
+  )
+}
+
 #' Clustering resolution sweep and clustree
 #'
 #' Recomputes UMAP/neighbors on the Harmony embedding, runs FindClusters
@@ -267,7 +287,11 @@ run_resolution_sweep <- function(seurat_obj, resolutions, output_dir,
   for (res in resolutions)
     clu <- FindClusters(clu, resolution = res, algorithm = 4, verbose = FALSE)
 
-  ggsave(file.path(output_dir, filename), clustree(clu, prefix = "RNA_snn_res."),
+  ggsave(file.path(output_dir, filename),
+         clustree(clu, prefix = "RNA_snn_res.",
+                  node_text_size = 9, node_size_range = c(8, 24),
+                  edge_width = 1.2) +
+           theme_clustree(),
          width = 18, height = 18, dpi = 300, limitsize = FALSE)
 
   clu
@@ -315,7 +339,10 @@ plot_annotated_clustree <- function(seurat_obj, clu, annot_col, output_dir,
   ggsave(
     file.path(output_dir, filename),
     clustree(clu, prefix = "RNA_snn_res.",
-             node_label = "celltype_label", node_label_aggr = "Mode"),
+             node_label = "celltype_label", node_label_aggr = "Mode",
+             node_label_size = 7, node_size_range = c(8, 24),
+             edge_width = 1.2) +
+      theme_clustree(),
     width = 14, height = 14, dpi = 300, limitsize = FALSE
   )
 
