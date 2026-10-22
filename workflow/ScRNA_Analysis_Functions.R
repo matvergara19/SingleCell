@@ -3448,7 +3448,7 @@ run_simple_go_enrichment <- function(diff_table,
   # Generate plots with title
   plot_title <- if (!is.null(cell_type)) paste0("GO Enrichment - ", cell_type) else "GO Enrichment"
 
-  pdf(file.path(output_dir, paste0(file_prefix, "_bubble.pdf")), width = 15, height = 14)
+  pdf(file.path(output_dir, paste0(file_prefix, "_bubble.pdf")), width = 15, height = 16)
   p <- dotplot(go_result, showCategory = 20, label_format = 40) +
     ggtitle(plot_title) +
     scale_size(range = c(4, 12)) +
