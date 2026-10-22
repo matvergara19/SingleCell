@@ -93,15 +93,28 @@ HIGHLIGHT_GENES = ["AT3G24140", "AT4G21750", "AT4G20260"]
 ORDERING        = "max"
 SPLINE_DF       = 3
 
-top_path, highlight_path = run_step29_gene_trends(
+name = os.path.basename(selected_trajectory_dir)
+
+# Step 1 - compute (slow, ~15 min). The fitted curves are saved in
+# <run>/gene_trends/gene_trends_fitted.h5ad and reused if you run it again.
+adata_fitted = compute_gene_trends(
     adata        = adata_traj,
     run_dir      = selected_trajectory_dir,
-    name         = os.path.basename(selected_trajectory_dir),
+    name         = name,
+    custom_genes = HIGHLIGHT_GENES,
+    n_jobs       = N_JOBS,
+    spline_df    = SPLINE_DF,
+)
+
+# Step 2 - plot (seconds). Change TOP_N, HIGHLIGHT_GENES or ORDERING and run only
+# this call again; nothing is recomputed.
+top_path, highlight_path = plot_gene_trends(
+    adata_fitted,
+    run_dir      = selected_trajectory_dir,
+    name         = name,
     custom_genes = HIGHLIGHT_GENES,
     top_n        = TOP_N,
     ordering     = ORDERING,
-    n_jobs       = N_JOBS,
-    spline_df    = SPLINE_DF,
 )
 
 print("SECTION 23 COMPLETE: gene trend plots saved")

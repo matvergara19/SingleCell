@@ -788,21 +788,38 @@ def select_genes_across_pseudotime(adata_fitted, genes, top_n, ordering="max"):
     return picked
 
 
-def run_step29_gene_trends(
+# Gene trends, in two steps so the plots can be redrawn without recomputing:
+#   1) compute_gene_trends(): association test + fitted curves (slow, ~15 min).
+#      The fitted object is saved in <run_dir>/gene_trends/gene_trends_fitted.h5ad
+#      and reused on the next call (reuse=True).
+#   2) plot_gene_trends(): the heatmaps (seconds). Change top_n, the highlighted
+#      genes, the ordering or spread_top and run only this step again.
+def compute_gene_trends(
     adata,
     run_dir,
-    name        = "trajectory",
+    name         = "trajectory",
     custom_genes = None,
-    top_n        = 50,
-    ordering     = "max",
     n_jobs       = 4,
     spline_df    = 5,
     A_cut        = 0.3,
     p_val_cut    = 0.001,
-    spread_top   = True,
+    reuse        = True,
 ):
     output_dir = os.path.join(run_dir, "gene_trends")
     os.makedirs(output_dir, exist_ok=True)
+    fitted_path = os.path.join(output_dir, "gene_trends_fitted.h5ad")
+
+    custom_genes = custom_genes or []
+
+    if reuse and os.path.exists(fitted_path):
+        adata_fitted = sc.read_h5ad(fitted_path)
+        missing = [g for g in custom_genes if g not in adata_fitted.var_names]
+        print(f"Loaded fitted gene trends: {fitted_path} ({adata_fitted.n_vars} genes)")
+        if missing:
+            print("These custom genes are not in the saved fit (they were not "
+                  f"significant when it was computed): {', '.join(missing)}. "
+                  "Run compute_gene_trends(..., reuse=False) to include them.")
+        return adata_fitted
 
     ensure_expression_in_X(adata)
 
@@ -824,18 +841,34 @@ def run_step29_gene_trends(
     # Custom genes are force-included in the fit even if not statistically
     # significant, so a gene you explicitly asked for never silently
     # disappears from either heatmap.
-    custom_genes  = custom_genes or []
     genes_present = [g for g in custom_genes if g in adata.var_names]
     missing       = sorted(set(custom_genes) - set(genes_present))
     if missing:
         print(f"custom selection: genes ignored (not found in adata): {', '.join(missing)}")
     fit_features = list(dict.fromkeys(significant_genes + genes_present))
 
-    # Fit on a copy so the caller's adata is never subsetted. Both heatmaps
-    # below reuse this single fit — rows = significant + custom genes, only
-    # the highlighted/labeled subset differs between the two plots.
+    # Fit on a copy so the caller's adata is never subsetted.
     adata_fitted = adata.copy()
     scf.tl.fit(adata_fitted, features=fit_features, n_jobs=n_jobs)
+
+    adata_fitted.write_h5ad(fitted_path)
+    print(f"✓ Fitted gene trends saved: {fitted_path}")
+    return adata_fitted
+
+
+def plot_gene_trends(
+    adata_fitted,
+    run_dir,
+    name         = "trajectory",
+    custom_genes = None,
+    top_n        = 10,
+    ordering     = "max",
+    spread_top   = True,
+):
+    output_dir = os.path.join(run_dir, "gene_trends")
+    os.makedirs(output_dir, exist_ok=True)
+
+    fit_features = list(adata_fitted.var_names)
 
     if spread_top:
         top_genes = select_genes_across_pseudotime(adata_fitted, fit_features, top_n, ordering)
@@ -852,7 +885,6 @@ def run_step29_gene_trends(
         fontsize            = 18,
         ordering            = ordering,
         show                = False,
-        title               = f"{name} — top {top_n} variable genes" + (" across pseudotime" if spread_top else ""),
     )
     top_pdf = os.path.join(output_dir, f"step29_gene_trends_top{top_n}_FINAL_24x18.pdf")
     save_trends_plot(axes_list, top_pdf,
@@ -860,6 +892,11 @@ def run_step29_gene_trends(
                            + (" across pseudotime" if spread_top else ""))
     print(f"✓ Top-{top_n} gene trends saved: {top_pdf}")
 
+    custom_genes  = custom_genes or []
+    genes_present = [g for g in custom_genes if g in adata_fitted.var_names]
+    missing       = sorted(set(custom_genes) - set(genes_present))
+    if missing:
+        print(f"custom selection: genes not in the saved fit: {', '.join(missing)}")
     custom_pdf = None
     if genes_present:
         axes_list = scf.pl.trends(
@@ -873,7 +910,6 @@ def run_step29_gene_trends(
             fontsize            = 18,
             ordering            = ordering,
             show                = False,
-            title               = f"{name} — custom selection",
         )
         custom_pdf = os.path.join(output_dir, "step29_gene_trends_highlight_list_FINAL_24x18.pdf")
         save_trends_plot(axes_list, custom_pdf, title=f"{name} — custom selection")
@@ -881,3 +917,40 @@ def run_step29_gene_trends(
 
     print("STEP 29 COMPLETE: gene trends saved")
     return top_pdf, custom_pdf
+
+
+# One-call version (compute + plot), kept for convenience.
+def run_step29_gene_trends(
+    adata,
+    run_dir,
+    name         = "trajectory",
+    custom_genes = None,
+    top_n        = 50,
+    ordering     = "max",
+    n_jobs       = 4,
+    spline_df    = 5,
+    A_cut        = 0.3,
+    p_val_cut    = 0.001,
+    spread_top   = True,
+):
+    adata_fitted = compute_gene_trends(adata, run_dir, name=name, custom_genes=custom_genes,
+                                       n_jobs=n_jobs, spline_df=spline_df,
+                                       A_cut=A_cut, p_val_cut=p_val_cut)
+    return plot_gene_trends(adata_fitted, run_dir, name=name, custom_genes=custom_genes,
+                            top_n=top_n, ordering=ordering, spread_top=spread_top)
+
+
+# Redraws the three trajectory figures of Section 21 (nodes, pseudotime, root cell)
+# from the saved <run_dir>/<name>_trajectory.h5ad, without running the inference
+# again. Use it after changing a plotting function.
+def replot_trajectory_figures(run_dir, annotation_col="celltype"):
+    name  = os.path.basename(os.path.normpath(run_dir))
+    adata = sc.read_h5ad(os.path.join(run_dir, f"{name}_trajectory.h5ad"))
+    p = pd.read_csv(os.path.join(run_dir, "parameters.tsv"), sep="\t", header=None,
+                    index_col=0)[1].to_dict()
+    label = f"nodes={p.get('nodes')}, sigma={p.get('sigma')}, lambda={p.get('lambda')}, eigs={p.get('eigs')}"
+    plot_trajectory_graphs(adata, name, run_dir, annotation_col, param_label=label)
+    plot_pseudotime_trajectory(adata, name, run_dir, annotation_col, param_label=label)
+    plot_root_cell(adata, name, run_dir, param_label=label)
+    return adata
+
