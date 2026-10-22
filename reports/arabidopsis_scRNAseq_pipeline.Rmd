@@ -908,7 +908,7 @@ ath_sc <- reduce(seurat_list, merge) %>%
   RunUMAP(reduction = "pca", dims = 1:30, verbose = FALSE)
 
 save_pdf(
-  DimPlot(ath_sc, group.by = "orig.ident", cols = colors),
+  plot_umap(ath_sc, "orig.ident", colors),
   "umap_preharmony.pdf"
 )
 
@@ -957,7 +957,7 @@ ath_sc <- ath_sc %>%
   RunUMAP(reduction = "harmony", dims = 1:30, verbose = FALSE)
 
 save_pdf(
-  DimPlot(ath_sc, group.by = "orig.ident", cols = colors),
+  plot_umap(ath_sc, "orig.ident", colors),
   "umap_postharmony.pdf"
 )
 

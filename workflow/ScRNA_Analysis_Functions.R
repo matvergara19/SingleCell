@@ -180,6 +180,38 @@ summarize_nfeature_plot <- function(obj_list, labels = NULL, colores = NULL) {
 }
 
 
+#' UMAP Colored by a Metadata Column
+#'
+#' DimPlot without title, with "umap 1" / "umap 2" axis labels and enlarged points and legend.
+#'
+#' @param obj               Seurat object with a UMAP reduction.
+#' @param group_by          Metadata column used to color the cells.
+#' @param colors            Vector of colors (one per group), or NULL.
+#' @param pt_size           Size of the cell points.
+#' @param legend_text_size  Size of the legend text.
+#' @param legend_key_cm     Size of the legend keys, in cm.
+#' @param legend_point_size Size of the points drawn in the legend.
+#' @param axis_title_size   Size of the axis titles.
+#' @param axis_text_size    Size of the axis tick labels.
+#' @param ...               Further arguments passed to Seurat::DimPlot().
+#' @return A ggplot object.
+#' @export
+plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
+                      pt_size = 1.5, legend_text_size = 40,
+                      legend_key_cm = 2.5, legend_point_size = 12,
+                      axis_title_size = 30, axis_text_size = 24, ...) {
+  DimPlot(obj, group.by = group_by, cols = colors, pt.size = pt_size, ...) +
+    labs(title = NULL, x = "umap 1", y = "umap 2") +
+    guides(color = guide_legend(override.aes = list(size = legend_point_size))) +
+    theme(
+      legend.text     = element_text(size = legend_text_size),
+      legend.key.size = unit(legend_key_cm, "cm"),
+      axis.title      = element_text(size = axis_title_size),
+      axis.text       = element_text(size = axis_text_size)
+    )
+}
+
+
 # =============================================================================
 # 2. CLUSTERING / RESOLUTION OPTIMIZATION
 # =============================================================================
