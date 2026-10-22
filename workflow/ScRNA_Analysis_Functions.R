@@ -1244,19 +1244,18 @@ annotate_by_reference <- function(seurat_obj,
 #' @export
 #' Plot and Save a Subcluster UMAP
 #'
-#' Creates a labeled DimPlot for a subclustered object, saves it to disk,
-#' and returns the plot invisibly for use in composite figures.
+#' Creates a labeled UMAP (plot_umap() format: "umap 1" / "umap 2" axes, no title)
+#' for a subclustered object, saves it to disk, and returns the plot invisibly.
 #'
 #' @param obj        Subclustered Seurat object (output of subcluster_cell_type).
-#' @param label      Cell-type label used as the plot title and to derive
-#'   the output filename (spaces replaced with underscores).
+#' @param label      Cell-type label used to derive the output filename (spaces
+#'   replaced with underscores).
 #' @param output_dir Directory where the PDF will be saved.
 #'
 #' @return ggplot object (invisibly).
 #' @export
 plot_subcluster_umap <- function(obj, label, output_dir) {
-  p <- DimPlot(obj, group.by = "cluster_subtipo", label = TRUE, raster = FALSE) +
-    ggtitle(paste0(label, " — subclusters")) +
+  p <- plot_umap(obj, "cluster_subtipo", label = TRUE, raster = FALSE) +
     coord_fixed()
   filename <- paste0("subcluster_", tolower(gsub(" ", "_", label)), ".pdf")
   ggsave(file.path(output_dir, filename), p, width = 18, height = 12, dpi = 300)
@@ -1378,11 +1377,18 @@ inspect_subcluster_markers <- function(obj, cluster_id, marker_table,
     resolution = resolution, dims = dims
   )
 
-  p_umap <- DimPlot(sub_obj, group.by = "cluster_subtipo", label = TRUE, raster = FALSE) +
+  # Half-width panels of a 20-inch figure: same format as plot_umap() with
+  # smaller text, and the dotplot at its compact sizes (14).
+  p_umap <- plot_umap(sub_obj, "cluster_subtipo", label = TRUE, raster = FALSE,
+                      legend_text_size = 18, legend_key_cm = 1.2,
+                      legend_point_size = 7, label_size = 7,
+                      axis_title_size = 20, axis_text_size = 14) +
     ggtitle(paste0("Cluster ", cluster_id, " - subclusters")) +
     coord_fixed()
 
-  p_dot <- plot_marker_dotplot(sub_obj, marker_table, annot_col = "cluster_subtipo") +
+  p_dot <- plot_marker_dotplot(sub_obj, marker_table, annot_col = "cluster_subtipo",
+                               celltype_text_size = 14, gene_text_size = 14,
+                               legend_text_size = 14) +
     ggtitle("Marker expression")
 
   top_row <- p_umap + p_dot

@@ -35,10 +35,7 @@ if (length(grouping) > 0) {
 }
 
 save_pdf(
-  DimPlot(
-    ath_sc, group.by = "celltype_grouped",
-    label = TRUE, repel = TRUE, raster = FALSE
-  ),
+  plot_umap(ath_sc, "celltype_grouped"),
   "umap_grouped.pdf"
 )
 
@@ -71,8 +68,7 @@ ath_sc <- curate_clusters(
 
 # 3. Save the curated annotation UMAP
 save_pdf(
-  DimPlot(ath_sc, group.by = "celltype_curated",
-          label = TRUE, repel = TRUE, raster = FALSE),
+  plot_umap(ath_sc, "celltype_curated"),
   "umap_curated.pdf"
 )
 
