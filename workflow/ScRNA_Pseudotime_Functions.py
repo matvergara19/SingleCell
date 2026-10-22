@@ -791,6 +791,24 @@ def select_genes_across_pseudotime(adata_fitted, genes, top_n, ordering="max"):
     return picked
 
 
+# Fits the given genes on their own and appends them to an already fitted object
+# (their association statistics stay empty: they were not tested).
+def _append_fitted_genes(adata, adata_fitted, genes, n_jobs=4):
+    import anndata as ad
+    ensure_expression_in_X(adata)
+    extra = adata.copy()
+    scf.tl.fit(extra, features=genes, n_jobs=n_jobs)
+    new = ad.AnnData(X=extra.X, obs=adata_fitted.obs.copy(),
+                     var=pd.DataFrame(index=extra.var_names))
+    for layer in adata_fitted.layers.keys():
+        if layer in extra.layers:
+            new.layers[layer] = extra.layers[layer]
+    for col, val in (("p_val", np.nan), ("A", np.nan), ("fdr", np.nan), ("st", 0), ("signi", False)):
+        if col in adata_fitted.var.columns:
+            new.var[col] = val
+    return ad.concat([adata_fitted, new], axis=1, join="outer", merge="first", uns_merge="first")
+
+
 # Gene trends, in two steps so the plots can be redrawn without recomputing:
 #   1) compute_gene_trends(): association test + fitted curves (slow, ~15 min).
 #      The fitted object is saved in <run_dir>/gene_trends/gene_trends_fitted.h5ad
@@ -816,12 +834,20 @@ def compute_gene_trends(
 
     if reuse and os.path.exists(fitted_path):
         adata_fitted = sc.read_h5ad(fitted_path)
-        missing = [g for g in custom_genes if g not in adata_fitted.var_names]
         print(f"Loaded fitted gene trends: {fitted_path} ({adata_fitted.n_vars} genes)")
-        if missing:
-            print("These custom genes are not in the saved fit (they were not "
-                  f"significant when it was computed): {', '.join(missing)}. "
-                  "Run compute_gene_trends(..., reuse=False) to include them.")
+        missing = [g for g in custom_genes if g not in adata_fitted.var_names]
+        addable = [g for g in missing if g in adata.var_names]
+        if addable:
+            # Custom genes that were not in the saved fit are fitted on their own
+            # (seconds) and appended to it, so the full computation is not repeated.
+            print(f"Fitting {len(addable)} extra gene(s) and adding them to the saved fit: "
+                  f"{', '.join(addable)}")
+            adata_fitted = _append_fitted_genes(adata, adata_fitted, addable, n_jobs)
+            adata_fitted.write_h5ad(fitted_path)
+            print(f"✓ Saved fit updated: {fitted_path}")
+        not_found = [g for g in missing if g not in adata.var_names]
+        if not_found:
+            print(f"custom selection: genes not found in adata: {', '.join(not_found)}")
         return adata_fitted
 
     ensure_expression_in_X(adata)

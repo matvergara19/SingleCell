@@ -89,7 +89,7 @@ print("SECTION 22 COMPLETE: gene trajectory plots saved")
 # Section 23 - Gene trends
 # ==============================================================================
 TOP_N           = 10
-HIGHLIGHT_GENES = ["AT3G24140", "AT4G21750", "AT4G20260"]
+HIGHLIGHT_GENES = ["AT3G24140", "AT3G10525"]
 ORDERING        = "max"
 SPLINE_DF       = 3
 
