@@ -253,7 +253,7 @@ plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
 #' @export
 plot_gene_umap <- function(obj, features, pt_size = 1.5, legend_text_size = 40,
                            legend_key_cm = 2.5, axis_title_size = 30,
-                           axis_text_size = 24, order = TRUE, title_size = 30, ...) {
+                           axis_text_size = 24, order = TRUE, title_size = 36, ...) {
   p <- FeaturePlot(obj, features = features, pt.size = pt_size,
                    order = order, ...) &
     labs(x = "umap 1", y = "umap 2") &
@@ -283,7 +283,7 @@ plot_gene_umap <- function(obj, features, pt_size = 1.5, legend_text_size = 40,
 #' @return A ggplot (or patchwork) object.
 #' @export
 plot_gene_violin <- function(obj, features, axis_title_size = 30,
-                             axis_text_size = 24, title_size = 30, ...) {
+                             axis_text_size = 24, title_size = 36, ...) {
   p <- VlnPlot(obj, features = features, ...) &
     labs(x = NULL) &
     theme(
