@@ -1987,8 +1987,6 @@ plot_heatmap <- function(mat,
 #' @param base_size         Base font size.
 #' @param celltype_text_size Font size of the cell-type labels (x axis).
 #' @param gene_text_size    Font size of the gene labels (y axis).
-#' @param legend_text_size  Font size of the legend text and titles.
-#' @param legend_key_cm     Size of the legend keys, in cm.
 #' @param name_gene         If TRUE (default), label genes with their symbol
 #'                          (e.g. "OPS"); if FALSE, label them with the gene ID
 #'                          only (e.g. "AT3G09070"). Tables without a symbol
@@ -2008,8 +2006,6 @@ plot_marker_dotplot <- function(seurat_obj,
                                      base_size       = 18,
                                      celltype_text_size = 24,
                                      gene_text_size  = 24,
-                                     legend_text_size = 40,
-                                     legend_key_cm   = 2.5,
                                      name_gene       = TRUE) {
 
   obj   <- seurat_obj
@@ -2091,10 +2087,7 @@ plot_marker_dotplot <- function(seurat_obj,
       axis.text.y  = element_text(size = gene_text_size, face = "italic"),
       axis.title   = element_blank(),
       panel.border = element_rect(color = "black", fill = NA),
-      legend.position = "right",
-      legend.text     = element_text(size = legend_text_size),
-      legend.title    = element_text(size = legend_text_size),
-      legend.key.size = unit(legend_key_cm, "cm")
+      legend.position = "right"
     )
 
   figure$layers[[1]]$aes_params$alpha <- 1   # solid dots
