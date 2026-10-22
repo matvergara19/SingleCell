@@ -41,6 +41,61 @@ KNOWN_ANNOTATION_COLS = ["celltype", "celltype_grouped", "celltype_curated"]
 
 # Notebook wrapper for Step 25. Loads the full curated object, fixes Seurat-style
 # coordinate names, plots the overview UMAP, and prints available cell types.
+# UMAP in the same format as the R figures (Section 7): visible x/y axes with
+# "umap 1" / "umap 2" labels, no title, cell-type names on the clusters and a
+# legend with one swatch per cell type on the right. Sizes are in points.
+def plot_celltype_umap(adata, annotation_col, path,
+                       point_size=40, label_size=23,
+                       axis_title_size=30, axis_text_size=24,
+                       legend_text_size=28, legend_point_size=17):
+    fig = sc.pl.umap(
+        adata,
+        color           = annotation_col,
+        legend_loc      = "on data",
+        legend_fontsize = label_size,
+        frameon         = True,
+        size            = point_size,
+        show            = False,
+        return_fig      = True,
+    )
+    ax = fig.axes[0]
+
+    # scanpy removes ticks and axis names on embeddings: restore them R-style
+    # (left and bottom axes only, "umap 1" / "umap 2", no title).
+    ax.xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+    ax.yaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+    ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.yaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.tick_params(axis="both", which="major", labelsize=axis_text_size,
+                   left=True, bottom=True, labelleft=True, labelbottom=True)
+    ax.set_xlabel("umap 1", fontsize=axis_title_size)
+    ax.set_ylabel("umap 2", fontsize=axis_title_size)
+    ax.set_title("")
+    ax.grid(False)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+
+    # Side legend with one color swatch per cell type, in addition to the
+    # on-data labels (scanpy only supports one legend_loc at a time).
+    cats    = adata.obs[annotation_col].cat.categories
+    colors  = adata.uns[f"{annotation_col}_colors"]
+    handles = [
+        plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=c,
+                   markersize=legend_point_size)
+        for c in colors
+    ]
+    ax.legend(
+        handles, cats,
+        loc="center left", bbox_to_anchor=(1.0, 0.5),
+        fontsize=legend_text_size, frameon=False, labelspacing=0.7,
+    )
+
+    fig.subplots_adjust(left=0.1, right=0.62)
+    save_plot_18x18(fig, path)
+    plt.close(fig)
+    return path
+
+
 def load_curated_object(input_h5ad, dir_pseudotime, annotation_col, n_jobs=4):
 
     print(f"Loading object: {input_h5ad}")
@@ -65,36 +120,8 @@ def load_curated_object(input_h5ad, dir_pseudotime, annotation_col, n_jobs=4):
     sc.settings.figdir = dir_pseudotime
     sc.set_figure_params(figsize=PLOT_FIGSIZE, dpi=100, dpi_save=PLOT_DPI)
 
-    fig = sc.pl.umap(
-        adata,
-        color              = annotation_col,
-        legend_loc         = "on data",
-        legend_fontsize    = 6,
-        legend_fontoutline = 2,
-        frameon            = False,
-        size               = 10,
-        show               = False,
-        return_fig         = True,
-    )
-
-    # Add a side legend with one color swatch per cell type, in addition to
-    # the on-data labels above (scanpy only supports one legend_loc at a time).
-    ax  = fig.axes[0]
-    cats   = adata.obs[annotation_col].cat.categories
-    colors = adata.uns[f"{annotation_col}_colors"]
-    handles = [
-        plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=c, markersize=8)
-        for c in colors
-    ]
-    ax.legend(
-        handles, cats,
-        loc="center left", bbox_to_anchor=(1.0, 0.5),
-        fontsize=6, frameon=False,
-    )
-
-    fig.subplots_adjust(right=0.78)
-    save_plot_18x18(fig, os.path.join(dir_pseudotime, "umap_overview.pdf"))
-    plt.close(fig)
+    plot_celltype_umap(adata, annotation_col,
+                       os.path.join(dir_pseudotime, "umap_overview.pdf"))
 
     counts = adata.obs[annotation_col].value_counts()
     print(f"\nCell types in '{annotation_col}':\n")
@@ -121,36 +148,8 @@ def preview_trajectory_selection(adata, clusters, annotation_col, dir_pseudotime
     adata_sub = adata[adata.obs[annotation_col].isin(clusters)].copy()
     print(f"Selected {len(adata_sub)} cells: {clusters}")
 
-    fig = sc.pl.umap(
-        adata_sub,
-        color              = annotation_col,
-        legend_loc         = "on data",
-        legend_fontsize    = 6,
-        legend_fontoutline = 2,
-        frameon            = False,
-        size               = 10,
-        show               = False,
-        return_fig         = True,
-    )
-
-    # Side legend with one color swatch per cell type, in addition to the
-    # on-data labels above (scanpy only supports one legend_loc at a time).
-    ax     = fig.axes[0]
-    cats   = adata_sub.obs[annotation_col].cat.categories
-    colors = adata_sub.uns[f"{annotation_col}_colors"]
-    handles = [
-        plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=c, markersize=8)
-        for c in colors
-    ]
-    ax.legend(
-        handles, cats,
-        loc="center left", bbox_to_anchor=(1.0, 0.5),
-        fontsize=6, frameon=False,
-    )
-
-    fig.subplots_adjust(right=0.78)
-    save_plot_18x18(fig, os.path.join(dir_pseudotime, "umap_selection.pdf"))
-    plt.close(fig)
+    plot_celltype_umap(adata_sub, annotation_col,
+                       os.path.join(dir_pseudotime, "umap_selection.pdf"))
 
     print("\nSTEP 26 COMPLETE: continue only if this UMAP looks biologically sensible")
     return adata_sub
