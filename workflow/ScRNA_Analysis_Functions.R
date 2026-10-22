@@ -201,8 +201,8 @@ summarize_nfeature_plot <- function(obj_list, labels = NULL, colores = NULL) {
 #' @return A ggplot object.
 #' @export
 plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
-                      pt_size = 1.5, legend_text_size = 40,
-                      legend_key_cm = 2.5, legend_point_size = 12,
+                      pt_size = 1.5, legend_text_size = 32,
+                      legend_key_cm = 2, legend_point_size = 10,
                       axis_title_size = 30, axis_text_size = 24,
                       label = NULL, label_size = 12, ...) {
   if (is.null(label)) label <- grepl("^(seurat_clusters|celltype)", group_by)
