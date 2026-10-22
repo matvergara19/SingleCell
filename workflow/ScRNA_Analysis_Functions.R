@@ -3524,9 +3524,10 @@ build_logfc_heatmap <- function(logfc_table,
                                 output_dir,
                                 limits     = c(-5, 5),
                                 cell_order = NULL,
-                                pdf_width  = 12,
+                                pdf_width  = 18,
                                 pdf_height = 18,
-                                column_names_size = 18) {
+                                column_names_size = 18,
+                                column_width_cm   = 1.5) {
 
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -3551,14 +3552,19 @@ build_logfc_heatmap <- function(logfc_table,
     mat <- mat[, ordered_cols, drop = FALSE]
   }
 
+  # Fixed column width: total heatmap width = columns + row dendrogram, so the
+  # columns do not stretch with the PDF width (the page just has extra margin).
+  dend_cm <- 4
+
   ht <- ComplexHeatmap::Heatmap(
     mat,
     name = "log2FC",
+    width = grid::unit(ncol(mat) * column_width_cm + dend_cm, "cm"),
     col  = circlize::colorRamp2(c(limits[1], 0, limits[2]), c("blue", "black", "yellow")),
 
     cluster_rows    = TRUE,          # hierarchical row ordering
     show_row_dend   = TRUE,
-    row_dend_width  = grid::unit(4, "cm"),
+    row_dend_width  = grid::unit(dend_cm, "cm"),
     cluster_columns = FALSE,         # keep the marker-table column order
 
     show_row_names    = FALSE,
@@ -3571,12 +3577,13 @@ build_logfc_heatmap <- function(logfc_table,
 
     heatmap_legend_param = list(
       title         = "log2FC",
-      title_gp      = gpar(fontsize = 12, fontface = "bold"),
-      legend_height = unit(4, "cm")
+      title_gp      = gpar(fontsize = 16, fontface = "bold"),
+      labels_gp     = gpar(fontsize = 13),
+      legend_height = unit(5, "cm"),
+      grid_width    = unit(5, "mm")
     )
   )
 
-  # A narrower PDF squeezes the columns (cell types); pdf_height sets the row space.
   pdf(file.path(output_dir, paste0("heatmap_", contrast_tag, ".pdf")),
       width = pdf_width, height = pdf_height)
   ComplexHeatmap::draw(ht, merge_legend = TRUE, padding = grid::unit(c(2, 2, 2, 10), "mm"))
