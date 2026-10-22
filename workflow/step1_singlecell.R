@@ -239,14 +239,14 @@ message("\nOK SECTION 7 COMPLETE: cell-type annotation complete")
 # ==============================================================================
 # Section 8 - Gene expression visualization
 # ==============================================================================
-gene <- "AT5G26000"   # one gene, or several: c("gen1", "gen2")
+gene <- "AT4G21750"   # one gene, or several: c("gen1", "gen2")
 
 output_dir <- dir_04
 
 ath_sc <- JoinLayers(ath_sc)
 Idents(ath_sc) <- "celltype"
 
-# Name each file after the plotted gene(s): AT5G26000  ->  ..._AT5G26000.pdf
+# Name each file after the plotted gene(s): AT4G21750  ->  ..._AT4G21750.pdf
 # c("gen1","gen2") -> ..._gen1_gen2.pdf
 gene_tag <- paste(gene, collapse = "_")
 
