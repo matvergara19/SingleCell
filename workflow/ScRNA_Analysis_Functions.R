@@ -188,8 +188,8 @@ summarize_nfeature_plot <- function(obj_list, labels = NULL, colores = NULL) {
 #' @param group_by          Metadata column used to color the cells.
 #' @param colors            Vector of colors (one per group), or NULL.
 #' @param pt_size           Size of the cell points.
-#' @param legend_text_size  Size of the legend text (default 32; 11.2 for cell-type columns).
-#' @param legend_key_cm     Size of the legend keys, in cm (default 2; 1.2 for cell-type columns).
+#' @param legend_text_size  Size of the legend text (default 32; 28 for cell-type columns).
+#' @param legend_key_cm     Size of the legend keys, in cm (default 2; 1.5 for cell-type columns).
 #' @param legend_point_size Size of the points drawn in the legend (default 10; 6 for cell-type columns).
 #' @param axis_title_size   Size of the axis titles.
 #' @param axis_text_size    Size of the axis tick labels.
@@ -198,7 +198,7 @@ summarize_nfeature_plot <- function(obj_list, labels = NULL, colores = NULL) {
 #'                          (name starting with "celltype"), FALSE otherwise.
 #'                          Cell-type columns have long names, so they get a smaller legend and
 #'                          labels by default (see the size parameters).
-#' @param label_size        Size of those labels (default 12; 6.7 for cell-type columns).
+#' @param label_size        Size of those labels (default 12; 8 for cell-type columns).
 #' @param repel             Avoid overlapping labels. Default NULL: TRUE for cell-type columns.
 #' @param raster            Rasterize the points. Default NULL: FALSE for cell-type columns,
 #'                          Seurat's automatic choice otherwise.
@@ -214,10 +214,10 @@ plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
   is_celltype <- grepl("^celltype", group_by)
 
   if (is.null(label))             label             <- is_celltype || group_by == "seurat_clusters"
-  if (is.null(legend_text_size))  legend_text_size  <- if (is_celltype) 11.2 else 32
-  if (is.null(legend_key_cm))     legend_key_cm     <- if (is_celltype) 1.2  else 2
+  if (is.null(legend_text_size))  legend_text_size  <- if (is_celltype) 28   else 32
+  if (is.null(legend_key_cm))     legend_key_cm     <- if (is_celltype) 1.5  else 2
   if (is.null(legend_point_size)) legend_point_size <- if (is_celltype) 6    else 10
-  if (is.null(label_size))        label_size        <- if (is_celltype) 6.7  else 12
+  if (is.null(label_size))        label_size        <- if (is_celltype) 8    else 12
   if (is.null(repel))             repel             <- is_celltype
   if (is.null(raster) && is_celltype) raster <- FALSE
 
