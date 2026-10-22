@@ -272,13 +272,13 @@ theme_clustree <- function(legend_text_size = 26, legend_title_size = 28) {
 #' @param seurat_obj  Seurat object with a Harmony reduction computed.
 #' @param resolutions Candidate resolutions to test.
 #' @param output_dir  Folder to save the clustree pdf into.
-#' @param filename    Output pdf filename (default: "clustree2.pdf").
+#' @param filename    Output pdf filename (default: "clustree.pdf").
 #' @param pca_dims    PCA/Harmony dimensions to use (default: 1:30).
 #' @param knn_k       Neighbors per cell for FindNeighbors (default: 20).
 #' @return The Seurat object with one `RNA_snn_res.<r>` column per tested resolution.
 #' @export
 run_resolution_sweep <- function(seurat_obj, resolutions, output_dir,
-                                  filename = "clustree2.pdf",
+                                  filename = "clustree.pdf",
                                   pca_dims = 1:30, knn_k = 20) {
   clu <- seurat_obj %>%
     RunUMAP(reduction = "harmony", dims = pca_dims, verbose = FALSE) %>%

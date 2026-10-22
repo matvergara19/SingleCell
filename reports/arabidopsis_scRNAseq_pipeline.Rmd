@@ -997,7 +997,7 @@ more, smaller ones. The values in `resolutions_test` are only the range of
 candidates to compare; widen or narrow it if the useful region lies outside it.
 
 The outputs are saved in `results/02_clustering/` as `elbow_plot.pdf` and
-`clustree2.pdf`. Use the clustree to choose `cluster_resolution` in Section 6.
+`clustree.pdf`. Use the clustree to choose `cluster_resolution` in Section 6.
 
 ```{r section_05_resolution_optimization}
 resolutions_test <- c(0.15, 0.35, 0.45, 0.55, 1.0)
@@ -1962,7 +1962,7 @@ results/
 |   `-- umap_postharmony.pdf
 |-- 02_clustering/
 |   |-- elbow_plot.pdf
-|   |-- clustree2.pdf
+|   |-- clustree.pdf
 |   `-- umap_seuratclusters.pdf
 |-- 03_annotation/
 |   |-- FindAllMarkers.tsv
