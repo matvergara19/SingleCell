@@ -5496,7 +5496,10 @@ plot_tf_de_network <- function(net, output_dir,
                                 contrast_tag = "condition_1_vs_condition_2",
                                 output_pdf   = "network_tf_DE_direction.pdf",
                                 output_width = 12,
-                                output_height = 10) {
+                                output_height = 10,
+                                legend_text_size  = 28,
+                                legend_key_cm     = 1.8,
+                                legend_point_size = 8) {
   g       <- net$graph
   node_df <- net$node_df
 
@@ -5511,6 +5514,7 @@ plot_tf_de_network <- function(net, output_dir,
   node_df$label <- ifelse(node_df$gene %in% top_tfs, node_df$gene, NA_character_)
 
   igraph::V(g)$node_color <- node_df$color[match(igraph::V(g)$name, node_df$gene)]
+  igraph::V(g)$direction  <- node_df$direction[match(igraph::V(g)$name, node_df$gene)]
   igraph::V(g)$shape_type <- node_df$shape_type[match(igraph::V(g)$name, node_df$gene)]
   igraph::V(g)$node_label <- node_df$label[match(igraph::V(g)$name, node_df$gene)]
 
@@ -5539,28 +5543,39 @@ plot_tf_de_network <- function(net, output_dir,
   p <- ggraph::ggraph(lay) +
     ggraph::geom_edge_link(alpha = 0.15, colour = "grey70", linewidth = 0.3) +
     ggraph::geom_node_point(
-      ggplot2::aes(colour = node_color, shape = shape_type),
+      ggplot2::aes(colour = direction, shape = shape_type),
       size = 2.5
     ) +
     ggraph::geom_node_text(
       ggplot2::aes(label = node_label),
       size = 2.5, repel = TRUE, max.overlaps = 20, na.rm = TRUE
     ) +
-    ggplot2::scale_colour_identity() +
+    ggplot2::scale_colour_manual(
+      values = dir_colors,
+      breaks = c("up", "down", "mixed"),
+      labels = c("up" = "Up-regulated", "down" = "Down-regulated",
+                 "mixed" = "Mixed across cell types"),
+      name   = NULL
+    ) +
     ggplot2::scale_shape_manual(
       values = c("circle" = 16, "triangle" = 17),
+      breaks = c("triangle", "circle"),
       labels = c("circle" = "Co-expression partner", "triangle" = "Transcription factor"),
       name   = NULL
     ) +
-    ggplot2::theme_void() +
-    ggplot2::labs(
-      title   = paste0("TF co-expression network (", contrast_tag, ")"),
-      caption = "Red = up-regulated | Blue = down-regulated | Grey = mixed across cell types"
+    ggplot2::guides(
+      shape  = ggplot2::guide_legend(
+        order = 1, override.aes = list(size = legend_point_size, colour = "grey30")),
+      colour = ggplot2::guide_legend(
+        order = 2, override.aes = list(size = legend_point_size, shape = 16))
     ) +
+    ggplot2::theme_void() +
+    ggplot2::labs(title = paste0("TF co-expression network (", contrast_tag, ")")) +
     ggplot2::theme(
-      legend.position = "bottom",
-      plot.title      = ggplot2::element_text(size = 11, face = "bold"),
-      plot.caption    = ggplot2::element_text(size = 8, colour = "grey40")
+      legend.position = "right",
+      legend.text     = ggplot2::element_text(size = legend_text_size),
+      legend.key.size = ggplot2::unit(legend_key_cm, "cm"),
+      plot.title      = ggplot2::element_text(size = 11, face = "bold")
     )
 
   out_file <- file.path(output_dir, output_pdf)
