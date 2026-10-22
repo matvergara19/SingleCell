@@ -3448,8 +3448,18 @@ run_simple_go_enrichment <- function(diff_table,
   # Generate plots with title
   plot_title <- if (!is.null(cell_type)) paste0("GO Enrichment - ", cell_type) else "GO Enrichment"
 
-  pdf(file.path(output_dir, paste0(file_prefix, "_bubble.pdf")), width = 18, height = 18)
-  p <- dotplot(go_result, showCategory = 20) + ggtitle(plot_title)
+  pdf(file.path(output_dir, paste0(file_prefix, "_bubble.pdf")), width = 18, height = 14)
+  p <- dotplot(go_result, showCategory = 20, label_format = 40) +
+    ggtitle(plot_title) +
+    scale_size(range = c(4, 12)) +
+    theme(
+      plot.title   = element_text(size = 30, face = "bold"),
+      axis.text.y  = element_text(size = 26),
+      axis.text.x  = element_text(size = 22),
+      axis.title.x = element_text(size = 26),
+      legend.text  = element_text(size = 22),
+      legend.title = element_text(size = 24)
+    )
   print(p)
   dev.off()
 
