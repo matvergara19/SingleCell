@@ -3523,7 +3523,9 @@ build_logfc_heatmap <- function(logfc_table,
                                 contrast_tag,
                                 output_dir,
                                 limits     = c(-5, 5),
-                                cell_order = NULL) {
+                                cell_order = NULL,
+                                pdf_width  = 12,
+                                pdf_height = 18) {
 
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -3573,8 +3575,9 @@ build_logfc_heatmap <- function(logfc_table,
     )
   )
 
+  # A narrower PDF squeezes the columns (cell types); pdf_height sets the row space.
   pdf(file.path(output_dir, paste0("heatmap_", contrast_tag, ".pdf")),
-      width = 18, height = 18)
+      width = pdf_width, height = pdf_height)
   ComplexHeatmap::draw(ht, merge_legend = TRUE, padding = grid::unit(c(2, 2, 2, 10), "mm"))
   dev.off()
 
