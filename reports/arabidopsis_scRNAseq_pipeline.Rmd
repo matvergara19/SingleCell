@@ -1849,7 +1849,9 @@ This section plots selected genes on the fitted epidermis cotyledon trajectory.
 changing `genes` is the only thing needed to inspect another marker. The figure
 is saved automatically in the run folder and named after the plotted genes
 (`gene_plots/trajectory_gene_AT4G21750.pdf` here; several genes are joined with
-`_`), and the path is printed.
+`_`), and the path is printed. The cells with the highest expression are drawn on
+top (`sort_order = TRUE`, the equivalent of `order = TRUE` in Seurat), so they are
+not hidden by the cells that do not express the gene.
 
 For this version, Section 22 is focused only on ATML1. In the count matrix ATML1
 is stored as the locus `AT4G21750`, so the code uses `AT4G21750` while the text
