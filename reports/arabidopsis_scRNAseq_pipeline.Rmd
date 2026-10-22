@@ -1832,15 +1832,11 @@ print("SECTION 21 COMPLETE: trajectory inference saved")
 Representative outputs from Section 21 for the epidermis-cotyledon-only trajectory using
 `nodes=100`, `sigma=0.1`, `lambda=20`, and `eigs=3`:
 
-```{=latex}
-\begin{center}
-```
-![Trajectory graph for the epidermis-cotyledon-only run (`nodes=100`, `sigma=0.1`, `lambda=20`, `eigs=3`, `seed=3`).](assets/pseudotime_trajectory_annotation.pdf){width=46%} ![Pseudotime overlaid on the epidermis-cotyledon-only force-directed layout (`eigs=3`).](assets/pseudotime_trajectory_time.pdf){width=46%}
-```{=latex}
-\end{center}
-```
+![Trajectory graph for the epidermis-cotyledon-only run (`nodes=100`, `sigma=0.1`, `lambda=20`, `eigs=3`, `seed=3`).](assets/pseudotime_trajectory_annotation.pdf){width=85%}
 
-![Root cell (red) set automatically at the tip of the tree with the highest mean number of detected genes — pseudotime = 0 here.](assets/pseudotime_root_cell.pdf){width=46%}
+![Pseudotime overlaid on the epidermis-cotyledon-only force-directed layout (`eigs=3`).](assets/pseudotime_trajectory_time.pdf){width=85%}
+
+![Root cell (red) set automatically at the tip of the tree with the highest mean number of detected genes — pseudotime = 0 here.](assets/pseudotime_root_cell.pdf){width=85%}
 
 ```{=latex}
 \clearpage

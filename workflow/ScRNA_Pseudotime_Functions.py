@@ -345,7 +345,8 @@ def draw_graph_basis(adata):
 # canvas is made wider instead of squeezing the plot, so the plot keeps its size.
 # Axes, titles and point sizes are left untouched.
 def fit_legend_inside(fig, ax, legend_text_size=28, legend_point_size=17,
-                      legend_x=1.04, extra_width_in=6.5):
+                      legend_x=1.04, legend_y=0.5, extra_width_in=6.5,
+                      extra_entries=None):
     leg = ax.get_legend()
     if leg is None:
         return
@@ -363,10 +364,14 @@ def fit_legend_inside(fig, ax, legend_text_size=28, legend_point_size=17,
                    markersize=legend_point_size)
         for h in handles
     ]
+    # extra_entries: list of (handle, label) appended below the cell types.
+    for h, lab in (extra_entries or []):
+        new_handles.append(h)
+        labels.append(lab)
     leg.remove()
     ax.legend(
         new_handles, labels,
-        loc="center left", bbox_to_anchor=(legend_x, 0.5),
+        loc="center left", bbox_to_anchor=(legend_x, legend_y),
         fontsize=legend_text_size, frameon=False, labelspacing=0.7,
     )
 
@@ -461,13 +466,15 @@ def add_pseudotime_bar(fig, ax, adata, cmap="viridis", text_size=20, label_size=
     norm = matplotlib.colors.Normalize(vmin=np.nanmin(t), vmax=np.nanmax(t))
     sm = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
     pos = ax.get_position()
-    cax = fig.add_axes([pos.x1 + 0.012, pos.y0 + 0.30 * pos.height,
-                        0.010, 0.40 * pos.height])
+    # Same column as the legend (legend_x = 1.04 of the plot width); bar in the
+    # upper part, legend below it.
+    cax = fig.add_axes([pos.x1 + 0.04 * pos.width, pos.y0 + 0.58 * pos.height,
+                        0.008, 0.30 * pos.height])
     cb = fig.colorbar(sm, cax=cax)
     cb.set_ticks([norm.vmin, norm.vmax])
     cb.set_ticklabels(["less advanced", "more advanced"])
     cb.ax.tick_params(labelsize=text_size, length=0, pad=10)
-    cb.set_label("pseudotime", fontsize=label_size, labelpad=-10)
+    cb.ax.set_title("pseudotime", fontsize=label_size, loc="left", pad=22)
     cb.outline.set_visible(False)
     return cb
 
@@ -515,12 +522,16 @@ def plot_pseudotime_trajectory(
     ax.set_xlabel(f"{layout}1")
     ax.set_ylabel(f"{layout}2")
 
-    title = f"{name} — pseudotime trajectory (red dot = root cell)"
+    title = f"{name} — pseudotime trajectory"
     if param_label:
         title += f"\n{param_label}"
     ax.set_title(title, fontsize=22)
-    # Wider canvas and legend further right, to leave room for the pseudotime bar.
-    fit_legend_inside(fig, ax, legend_x=1.22, extra_width_in=9)
+    # Pseudotime bar on top and cell-type legend below, in one column to the right.
+    root_handle = plt.Line2D([0], [0], marker="o", color="w", markerfacecolor="red",
+                             markeredgecolor="black", markeredgewidth=1.5,
+                             markersize=17)
+    fit_legend_inside(fig, ax, legend_x=1.04, legend_y=0.30, extra_width_in=7.5,
+                      extra_entries=[(root_handle, "Root cell")])
     add_pseudotime_bar(fig, ax, adata)
     fig.savefig(os.path.join(output_dir, f"{name}_pseudotime_trajectory.pdf"),
                 dpi=PLOT_DPI, facecolor="white")
