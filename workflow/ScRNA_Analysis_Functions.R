@@ -3525,7 +3525,8 @@ build_logfc_heatmap <- function(logfc_table,
                                 limits     = c(-5, 5),
                                 cell_order = NULL,
                                 pdf_width  = 12,
-                                pdf_height = 18) {
+                                pdf_height = 18,
+                                column_names_size = 18) {
 
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -3562,7 +3563,7 @@ build_logfc_heatmap <- function(logfc_table,
 
     show_row_names    = FALSE,
     show_column_names = TRUE,
-    column_names_gp   = grid::gpar(fontsize = 10, fontface = "bold"),
+    column_names_gp   = grid::gpar(fontsize = column_names_size, fontface = "bold"),
     column_names_rot  = 45,
 
     column_title    = sprintf("log2FC — %s  (%d genes)", contrast_tag, nrow(mat)),
