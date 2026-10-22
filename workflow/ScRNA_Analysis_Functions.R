@@ -250,16 +250,21 @@ plot_resolution_elbow <- function(seurat_obj, output_dir, filename = "elbow_plot
 #'
 #' @param legend_text_size  Size of the legend text.
 #' @param legend_title_size Size of the legend titles.
-#' @return A ggplot2 theme.
+#' @param legend_point_size Size of the points in the resolution legend.
+#' @return A list of ggplot2 components (legend guide and theme).
 #' @export
-theme_clustree <- function(legend_text_size = 26, legend_title_size = 28) {
-  theme(
-    legend.text        = element_text(size = legend_text_size),
-    legend.title       = element_text(size = legend_title_size),
-    legend.key.size    = unit(1.4, "cm"),
-    legend.box.spacing = unit(4, "pt"),
-    legend.spacing.y   = unit(6, "pt"),
-    plot.margin        = margin(4, 4, 4, 4)
+theme_clustree <- function(legend_text_size = 26, legend_title_size = 28,
+                           legend_point_size = 8) {
+  list(
+    guides(colour = guide_legend(override.aes = list(size = legend_point_size))),
+    theme(
+      legend.text        = element_text(size = legend_text_size),
+      legend.title       = element_text(size = legend_title_size),
+      legend.key.size    = unit(1.4, "cm"),
+      legend.box.spacing = unit(4, "pt"),
+      legend.spacing.y   = unit(6, "pt"),
+      plot.margin        = margin(4, 4, 4, 4)
+    )
   )
 }
 
