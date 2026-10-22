@@ -193,14 +193,21 @@ summarize_nfeature_plot <- function(obj_list, labels = NULL, colores = NULL) {
 #' @param legend_point_size Size of the points drawn in the legend.
 #' @param axis_title_size   Size of the axis titles.
 #' @param axis_text_size    Size of the axis tick labels.
+#' @param label             Print the group names on the plot. Default NULL: TRUE when
+#'                          group_by is "seurat_clusters" (cluster numbers), FALSE otherwise.
+#' @param label_size        Size of those labels.
 #' @param ...               Further arguments passed to Seurat::DimPlot().
 #' @return A ggplot object.
 #' @export
 plot_umap <- function(obj, group_by = "orig.ident", colors = NULL,
                       pt_size = 1.5, legend_text_size = 40,
                       legend_key_cm = 2.5, legend_point_size = 12,
-                      axis_title_size = 30, axis_text_size = 24, ...) {
-  DimPlot(obj, group.by = group_by, cols = colors, pt.size = pt_size, ...) +
+                      axis_title_size = 30, axis_text_size = 24,
+                      label = NULL, label_size = 12, ...) {
+  if (is.null(label)) label <- group_by == "seurat_clusters"
+
+  DimPlot(obj, group.by = group_by, cols = colors, pt.size = pt_size,
+          label = label, label.size = label_size, ...) +
     labs(title = NULL, x = "umap 1", y = "umap 2") +
     guides(color = guide_legend(override.aes = list(size = legend_point_size))) +
     theme(

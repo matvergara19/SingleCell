@@ -1073,7 +1073,7 @@ ath_sc <- ath_sc %>%
 
 Idents(ath_sc) <- "seurat_clusters"
 save_pdf(
-  plot_umap(ath_sc, "seurat_clusters", label = TRUE, label.size = 12),
+  plot_umap(ath_sc, "seurat_clusters"),
   "umap_seuratclusters.pdf"
 )
 
