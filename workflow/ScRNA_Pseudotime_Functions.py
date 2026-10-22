@@ -453,6 +453,25 @@ def mark_root_cell(ax, adata, basis):
                edgecolor="black", linewidth=0.5, zorder=10)
 
 
+# Vertical color bar for the pseudotime (t) next to the plot: the bottom end is
+# the least advanced cells (start of the trajectory) and the top end the most
+# advanced ones. Uses the same colormap as the trajectory line (viridis).
+def add_pseudotime_bar(fig, ax, adata, cmap="viridis", text_size=20, label_size=24):
+    t = np.asarray(adata.obs["t"], dtype=float)
+    norm = matplotlib.colors.Normalize(vmin=np.nanmin(t), vmax=np.nanmax(t))
+    sm = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
+    pos = ax.get_position()
+    cax = fig.add_axes([pos.x1 + 0.012, pos.y0 + 0.30 * pos.height,
+                        0.010, 0.40 * pos.height])
+    cb = fig.colorbar(sm, cax=cax)
+    cb.set_ticks([norm.vmin, norm.vmax])
+    cb.set_ticklabels(["less advanced", "more advanced"])
+    cb.ax.tick_params(labelsize=text_size, length=0, pad=10)
+    cb.set_label("pseudotime", fontsize=label_size, labelpad=-10)
+    cb.outline.set_visible(False)
+    return cb
+
+
 def plot_pseudotime_trajectory(
     adata,
     name,
@@ -499,8 +518,10 @@ def plot_pseudotime_trajectory(
     title = f"{name} — pseudotime trajectory (red dot = root cell)"
     if param_label:
         title += f"\n{param_label}"
-    ax.set_title(title)
-    fit_legend_inside(fig, ax)
+    ax.set_title(title, fontsize=22)
+    # Wider canvas and legend further right, to leave room for the pseudotime bar.
+    fit_legend_inside(fig, ax, legend_x=1.22, extra_width_in=9)
+    add_pseudotime_bar(fig, ax, adata)
     fig.savefig(os.path.join(output_dir, f"{name}_pseudotime_trajectory.pdf"),
                 dpi=PLOT_DPI, facecolor="white")
 
@@ -690,12 +711,15 @@ def run_trajectory_runs(
 # plotted genes, as in Section 8: one gene -> trajectory_gene_AT4G21750.pdf, several
 # -> trajectory_gene_AT3G24140_AT4G21750.pdf. Puts the expression in .X if needed,
 # creates the folder, closes the figure, and returns the saved path.
-def plot_genes_on_trajectory(adata, genes, run_dir, titles=None):
+def plot_genes_on_trajectory(adata, genes, run_dir, titles=None, title_size=22):
     ensure_expression_in_X(adata)
     out_dir = os.path.join(run_dir, "gene_plots")
     os.makedirs(out_dir, exist_ok=True)
     fig = sc.pl.draw_graph(adata, color=genes, title=titles if titles is not None else genes,
                            show=False, return_fig=True)
+    for ax in fig.axes:
+        if ax.get_title():
+            ax.set_title(ax.get_title(), fontsize=title_size)
     path = os.path.join(out_dir, f"trajectory_gene_{'_'.join(genes)}.pdf")
     save_plot_18x18(fig, path)
     plt.close(fig)
