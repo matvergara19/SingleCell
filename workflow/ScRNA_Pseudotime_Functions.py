@@ -47,7 +47,8 @@ KNOWN_ANNOTATION_COLS = ["celltype", "celltype_grouped", "celltype_curated"]
 def plot_celltype_umap(adata, annotation_col, path,
                        point_size=40, label_size=23,
                        axis_title_size=30, axis_text_size=24,
-                       legend_text_size=28, legend_point_size=17):
+                       legend_text_size=28, legend_point_size=17,
+                       axis_pad=0.08, legend_x=1.12):
     fig = sc.pl.umap(
         adata,
         color           = annotation_col,
@@ -68,9 +69,17 @@ def plot_celltype_umap(adata, annotation_col, path,
     ax.yaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
     ax.tick_params(axis="both", which="major", labelsize=axis_text_size,
                    left=True, bottom=True, labelleft=True, labelbottom=True)
-    ax.set_xlabel("umap 1", fontsize=axis_title_size)
-    ax.set_ylabel("umap 2", fontsize=axis_title_size)
+    ax.set_xlabel("umap 1", fontsize=axis_title_size, labelpad=18)
+    ax.set_ylabel("umap 2", fontsize=axis_title_size, labelpad=18)
+    ax.tick_params(axis="both", which="major", pad=10)
     ax.set_title("")
+
+    # Extra room around the cells (axis_pad = fraction of the range), so labels
+    # of clusters near the border stay inside the plot.
+    for get_lim, set_lim in ((ax.get_xlim, ax.set_xlim), (ax.get_ylim, ax.set_ylim)):
+        lo, hi = get_lim()
+        pad = axis_pad * (hi - lo)
+        set_lim(lo - pad, hi + pad)
     ax.grid(False)
     for side in ("top", "right"):
         ax.spines[side].set_visible(False)
@@ -86,11 +95,11 @@ def plot_celltype_umap(adata, annotation_col, path,
     ]
     ax.legend(
         handles, cats,
-        loc="center left", bbox_to_anchor=(1.0, 0.5),
+        loc="center left", bbox_to_anchor=(legend_x, 0.5),
         fontsize=legend_text_size, frameon=False, labelspacing=0.7,
     )
 
-    fig.subplots_adjust(left=0.1, right=0.62)
+    fig.subplots_adjust(left=0.12, right=0.58)
     save_plot_18x18(fig, path)
     plt.close(fig)
     return path
